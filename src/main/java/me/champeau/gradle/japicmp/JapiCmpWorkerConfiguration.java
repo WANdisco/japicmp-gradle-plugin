@@ -37,10 +37,10 @@ public class JapiCmpWorkerConfiguration implements Serializable {
   protected final List<String> annotationExcludes;
   protected final List<FilterConfiguration> includeFilters;
   protected final List<FilterConfiguration> excludeFilters;
-  protected final List<JApiCmpWorkerAction.Archive> oldClasspath;
-  protected final List<JApiCmpWorkerAction.Archive> newClasspath;
-  protected final List<JApiCmpWorkerAction.Archive> oldArchives;
-  protected final List<JApiCmpWorkerAction.Archive> newArchives;
+  protected final List<Archive> oldClasspath;
+  protected final List<Archive> newClasspath;
+  protected final List<Archive> oldArchives;
+  protected final List<Archive> newArchives;
   protected final boolean onlyModified;
   protected final boolean onlyBinaryIncompatibleModified;
   protected final boolean failOnSourceIncompatibility;
@@ -51,60 +51,63 @@ public class JapiCmpWorkerConfiguration implements Serializable {
   protected final boolean failOnModification;
   protected final File buildDir;
   protected final RichReport richReport;
+    protected final File compatibilityChangesFilterFile;
 
-  public JapiCmpWorkerConfiguration(final boolean includeSynthetic,
-                                    final boolean ignoreMissingClasses,
-                                    final List<String> packageIncludes,
-                                    final List<String> packageExcludes,
-                                    final List<String> classIncludes,
-                                    final List<String> classExcludes,
-                                    final List<String> methodIncludes,
-                                    final List<String> methodExcludes,
-                                    final List<String> fieldIncludes,
-                                    final List<String> fieldExcludes,
-                                    final List<String> annotationIncludes,
-                                    final List<String> annotationExcludes,
-                                    final List<FilterConfiguration> includeFilters,
-                                    final List<FilterConfiguration> excludeFilters,
-                                    final List<JApiCmpWorkerAction.Archive> oldClasspath,
-                                    final List<JApiCmpWorkerAction.Archive> newClasspath,
-                                    final List<JApiCmpWorkerAction.Archive> oldArchives,
-                                    final List<JApiCmpWorkerAction.Archive> newArchives,
-                                    final boolean onlyModified,
-                                    final boolean onlyBinaryIncompatibleModified,
-                                    final boolean failOnSourceIncompatibility,
-                                    final String accessModifier,
-                                    final File xmlOutputFile,
-                                    final File htmlOutputFile,
-                                    final File txtOutputFile,
-                                    final boolean failOnModification,
-                                    final File buildDir,
-                                    final RichReport richReport) {
-    this.includeSynthetic = includeSynthetic;
-    this.ignoreMissingClasses = ignoreMissingClasses;
-    this.packageIncludes = packageIncludes;
-    this.packageExcludes = packageExcludes;
-    this.classIncludes = classIncludes;
-    this.classExcludes = classExcludes;
-    this.methodIncludes = methodIncludes;
-    this.methodExcludes = methodExcludes;
-    this.fieldIncludes = fieldIncludes;
-    this.fieldExcludes = fieldExcludes;
-    this.annotationIncludes = annotationIncludes;
-    this.annotationExcludes = annotationExcludes;
-    this.includeFilters = includeFilters;
-    this.excludeFilters = excludeFilters;
-    this.oldClasspath = oldClasspath;
-    this.newClasspath = newClasspath;
-    this.oldArchives = oldArchives;
-    this.newArchives = newArchives;
-    this.onlyModified = onlyModified;
-    this.onlyBinaryIncompatibleModified = onlyBinaryIncompatibleModified;
-    this.failOnSourceIncompatibility = failOnSourceIncompatibility;
-    this.accessModifier = accessModifier;
-    this.xmlOutputFile = xmlOutputFile;
-    this.htmlOutputFile = htmlOutputFile;
-    this.txtOutputFile = txtOutputFile;
+  public JapiCmpWorkerConfiguration(boolean includeSynthetic,
+                                      boolean ignoreMissingClasses,
+                                      List<String> packageIncludes,
+                                      List<String> packageExcludes,
+                                      List<String> classIncludes,
+                                      List<String> classExcludes,
+                                      List<String> methodIncludes,
+                                      List<String> methodExcludes,
+                                      List<String> fieldIncludes,
+                                      List<String> fieldExcludes,
+                                      List<String> annotationIncludes,
+                                      List<String> annotationExcludes,
+                                      List<FilterConfiguration> includeFilters,
+                                      List<FilterConfiguration> excludeFilters,
+                                      List<Archive> oldClasspath,
+                                      List<Archive> newClasspath,
+                                      List<Archive> oldArchives,
+                                      List<Archive> newArchives,
+                                      boolean onlyModified,
+                                      boolean onlyBinaryIncompatibleModified,
+                                      boolean failOnSourceIncompatibility,
+                                      String accessModifier,
+                                      File xmlOutputFile,
+                                      File htmlOutputFile,
+                                      File txtOutputFile,
+                                      boolean failOnModification,
+                                      File buildDir,
+                                      RichReport richReport,
+                                      File compatibilityChangesFilterFile) {
+        this.includeSynthetic = includeSynthetic;
+        this.ignoreMissingClasses = ignoreMissingClasses;
+        this.packageIncludes = packageIncludes;
+        this.packageExcludes = packageExcludes;
+        this.classIncludes = classIncludes;
+        this.classExcludes = classExcludes;
+        this.methodIncludes = methodIncludes;
+        this.methodExcludes = methodExcludes;
+        this.fieldIncludes = fieldIncludes;
+        this.fieldExcludes = fieldExcludes;
+        this.annotationIncludes = annotationIncludes;
+        this.annotationExcludes = annotationExcludes;
+        this.includeFilters = includeFilters;
+        this.excludeFilters = excludeFilters;
+        this.oldClasspath = oldClasspath;
+        this.newClasspath = newClasspath;
+        this.oldArchives = oldArchives;
+        this.newArchives = newArchives;
+        this.onlyModified = onlyModified;
+        this.onlyBinaryIncompatibleModified = onlyBinaryIncompatibleModified;
+        this.failOnSourceIncompatibility = failOnSourceIncompatibility;
+        this.accessModifier = accessModifier;
+        this.xmlOutputFile = xmlOutputFile;
+        this.htmlOutputFile = htmlOutputFile;
+        this.txtOutputFile = txtOutputFile;
+        this.compatibilityChangesFilterFile = compatibilityChangesFilterFile;
     this.failOnModification = failOnModification | failOnSourceIncompatibility;
     this.buildDir = buildDir;
     this.richReport = richReport;

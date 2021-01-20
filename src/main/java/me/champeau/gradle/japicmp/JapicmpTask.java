@@ -2,6 +2,7 @@ package me.champeau.gradle.japicmp;
 
 import japicmp.filter.Filter;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
+import me.champeau.gradle.japicmp.ignore.Parser;
 import me.champeau.gradle.japicmp.report.RichReport;
 import me.champeau.gradle.japicmp.report.RuleConfiguration;
 import org.gradle.api.Action;
@@ -62,6 +63,7 @@ public class JapicmpTask extends DefaultTask {
   private FileCollection newArchives;
   private boolean ignoreMissingClasses = false;
   private RichReport richReport;
+  private File compatibilityChangesFilterFile;
 
   @TaskAction
   public void exec() {
@@ -82,7 +84,7 @@ public class JapicmpTask extends DefaultTask {
           }
         }
         if (richReport != null) {
-          for (RuleConfiguration configuration : richReport.getRules()) {
+          for (RuleConfiguration<?> configuration : richReport.getRules()) {
             addClasspathFor(configuration.getRuleClass(), classpath);
           }
         }
@@ -90,8 +92,8 @@ public class JapicmpTask extends DefaultTask {
           classpath.addAll(resolveJaxb().getFiles());
         }
         workerConfiguration.setClasspath(classpath);
-        List<JApiCmpWorkerAction.Archive> baseline = JapicmpTask.this.oldArchives != null ? toArchives(JapicmpTask.this.oldArchives) : inferArchives(oldClasspath);
-        List<JApiCmpWorkerAction.Archive> current = JapicmpTask.this.newArchives != null ? toArchives(JapicmpTask.this.newArchives) : inferArchives(newClasspath);
+        List<Archive> baseline = JapicmpTask.this.oldArchives != null ? toArchives(JapicmpTask.this.oldArchives) : inferArchives(oldClasspath);
+        List<Archive> current = JapicmpTask.this.newArchives != null ? toArchives(JapicmpTask.this.newArchives) : inferArchives(newClasspath);
         workerConfiguration.setDisplayName("JApicmp check comparing " + current + " with " + baseline);
         workerConfiguration.params(
             // we use a single configuration object, instead of passing each parameter directly,
@@ -124,7 +126,8 @@ public class JapicmpTask extends DefaultTask {
                 getTxtOutputFile(),
                 isFailOnModification(),
                 getProject().getBuildDir(),
-                richReport
+                getRichReport(),
+                getCompatibilityChangesFilterFile()
             )
         );
       }
@@ -155,9 +158,9 @@ public class JapicmpTask extends DefaultTask {
     }
   }
 
-  private List<JApiCmpWorkerAction.Archive> inferArchives(FileCollection fc) {
+  private List<Archive> inferArchives(FileCollection fc) {
     if (fc instanceof Configuration) {
-      final List<JApiCmpWorkerAction.Archive> archives = new ArrayList<>();
+      final List<Archive> archives = new ArrayList<>();
       Set<ResolvedDependency> firstLevelModuleDependencies = ((Configuration) fc).getResolvedConfiguration().getFirstLevelModuleDependencies();
       for (ResolvedDependency moduleDependency : firstLevelModuleDependencies) {
         collectArchives(archives, moduleDependency);
@@ -168,18 +171,44 @@ public class JapicmpTask extends DefaultTask {
     return toArchives(fc);
   }
 
-  private static List<JApiCmpWorkerAction.Archive> toArchives(FileCollection fc) {
+  private static List<Archive> toArchives(FileCollection fc) {
     Set<File> files = fc.getFiles();
-    List<JApiCmpWorkerAction.Archive> archives = new ArrayList<>(files.size());
+    List<Archive> archives = new ArrayList<>(files.size());
     for (File file : files) {
-      archives.add(new JApiCmpWorkerAction.Archive(file, "1.0"));
+      archives.add(new Archive(file, tryExtractVersion(file)));
     }
     return archives;
   }
 
-  private void collectArchives(final List<JApiCmpWorkerAction.Archive> archives, ResolvedDependency resolvedDependency) {
+  private static String tryExtractVersion(File file) {
+    try {
+      String name = file.getName();
+      String[] nameAndExtension = Parser.splitByLastDotChar(name);
+      String fileName = nameAndExtension[0];
+      int minusCount = fileName.contains("SNAPSHOT") ? 2 : 1;
+      int i = fileName.length();
+      while (--i >= 0 && minusCount > 0) {
+        char c = fileName.charAt(i);
+        if (c == '-') minusCount--;
+      }
+      if (minusCount == 0) {
+        return fileName.substring(i + 2);
+      }
+    } catch (Exception ignored) { }
+    return "1.0";
+  }
+
+
+  public static void main(String[] args) {
+    String s = tryExtractVersion(new File("test1-1.1.jar"));
+    assert s.equals("1.1");
+    String s1 = tryExtractVersion(new File("test1-1.2-SNAPSHOT.jar"));
+    assert s1.equals("1.2-SNAPSHOT");
+  }
+
+  private void collectArchives(final List<Archive> archives, ResolvedDependency resolvedDependency) {
     String version = resolvedDependency.getModule().getId().getVersion();
-    archives.add(new JApiCmpWorkerAction.Archive(resolvedDependency.getAllModuleArtifacts().iterator().next().getFile(), version));
+    archives.add(new Archive(resolvedDependency.getAllModuleArtifacts().iterator().next().getFile(), version));
     for (ResolvedDependency dependency : resolvedDependency.getChildren()) {
       collectArchives(archives, dependency);
     }
@@ -461,6 +490,16 @@ public class JapicmpTask extends DefaultTask {
 
   public void setRichReport(RichReport richReport) {
     this.richReport = richReport;
+  }
+
+  @Optional
+  @Nested
+  public File getCompatibilityChangesFilterFile() {
+    return compatibilityChangesFilterFile;
+  }
+
+  public void setCompatibilityChangesFilterFile(File compatibilityChangesFilterFile) {
+    this.compatibilityChangesFilterFile = compatibilityChangesFilterFile;
   }
 
 }

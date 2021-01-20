@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
 
 public class GroovyReportRenderer implements RichReportRenderer {
@@ -18,7 +19,7 @@ public class GroovyReportRenderer implements RichReportRenderer {
     templateConfiguration.setAutoNewLine(true);
     templateConfiguration.setAutoIndent(true);
     MarkupTemplateEngine engine = new MarkupTemplateEngine(this.getClass().getClassLoader(), templateConfiguration);
-    Template template = null;
+    Template template;
     try {
       template = engine.createTemplate(this.getClass().getResource("/templates/default.groovy"));
     } catch (IOException | ClassNotFoundException e) {
@@ -32,7 +33,7 @@ public class GroovyReportRenderer implements RichReportRenderer {
     model.put("violations", data.getViolations());
     htmlReportFile.getParentFile().mkdirs();
     try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-        new FileOutputStream(htmlReportFile), "utf-8"
+        new FileOutputStream(htmlReportFile), StandardCharsets.UTF_8
     ))) {
       template.make(model).writeTo(writer);
     } catch (IOException e) {
