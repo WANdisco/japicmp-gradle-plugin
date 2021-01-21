@@ -19,25 +19,25 @@ import java.util.List;
 import java.util.Map;
 
 public class RichReportData {
-    private final String reportTitle;
-    private final String description;
-    private final Map<String, List<Violation>> violations;
+  private final String reportTitle;
+  private final String description;
+  private final Map<String, List<Violation>> violations;
 
-    public RichReportData(final String reportTitle, final String description, final Map<String, List<Violation>> violations) {
-        this.reportTitle = reportTitle;
-        this.description = description;
-        this.violations = violations;
-    }
+  public RichReportData(final String reportTitle, final String description, final Map<String, List<Violation>> violations) {
+    this.reportTitle = reportTitle;
+    this.description = description;
+    this.violations = violations;
+  }
 
-    public String getReportTitle() {
-        return reportTitle;
-    }
+  public String getReportTitle() {
+    return reportTitle;
+  }
 
-    public String getDescription() {
-        return description;
-    }
+  public String getDescription() {
+    return description;
+  }
 
-    public Map<String, List<Violation>> getViolations() {
-        return violations;
-    }
+  public Map<String, List<Violation>> getViolations() {
+    return violations;
+  }
 }

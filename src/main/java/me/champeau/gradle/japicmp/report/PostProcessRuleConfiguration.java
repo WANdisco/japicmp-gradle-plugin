@@ -18,7 +18,7 @@ package me.champeau.gradle.japicmp.report;
 import java.util.Map;
 
 public class PostProcessRuleConfiguration extends RuleConfiguration<PostProcessViolationsRule> {
-    public PostProcessRuleConfiguration(final Class<? extends PostProcessViolationsRule> ruleClass, final Map<String, String> arguments) {
-        super(ruleClass, arguments);
-    }
+  public PostProcessRuleConfiguration(final Class<? extends PostProcessViolationsRule> ruleClass, final Map<String, String> arguments) {
+    super(ruleClass, arguments);
+  }
 }

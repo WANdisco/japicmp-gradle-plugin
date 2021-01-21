@@ -18,19 +18,21 @@ package me.champeau.gradle.japicmp.report;
 import java.util.Map;
 
 public interface ViolationCheckContext {
-    /**
-     * Returns the fully-qualified class name of the class being currently checked
-     * @return the fully-qualified class name of the class being currently checked, or null if it's a pre/post rule
-     */
-    String getClassName();
+  /**
+   * Returns the fully-qualified class name of the class being currently checked
+   *
+   * @return the fully-qualified class name of the class being currently checked, or null if it's a pre/post rule
+   */
+  String getClassName();
 
-    /**
-     * Returns a map that can be used by the writer of a rule to read and write arbitrary data.
-     * @return a user-data map, never null
-     */
-    Map<String, ?> getUserData();
+  /**
+   * Returns a map that can be used by the writer of a rule to read and write arbitrary data.
+   *
+   * @return a user-data map, never null
+   */
+  Map<String, ?> getUserData();
 
-    <T> T getUserData(String key);
+  <T> T getUserData(String key);
 
-    <T> void putUserData(String key, T value);
+  <T> void putUserData(String key, T value);
 }

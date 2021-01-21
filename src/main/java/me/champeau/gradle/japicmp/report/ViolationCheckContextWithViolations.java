@@ -19,5 +19,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface ViolationCheckContextWithViolations extends ViolationCheckContext {
-    Map<String, List<Violation>> getViolations();
+  Map<String, List<Violation>> getViolations();
 }

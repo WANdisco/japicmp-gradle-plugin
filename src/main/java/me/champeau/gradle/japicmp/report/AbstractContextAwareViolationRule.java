@@ -16,13 +16,13 @@
 package me.champeau.gradle.japicmp.report;
 
 public abstract class AbstractContextAwareViolationRule implements ViolationRule {
-    private ViolationCheckContext context;
+  private ViolationCheckContext context;
 
-    public ViolationCheckContext getContext() {
-        return context;
-    }
+  public ViolationCheckContext getContext() {
+    return context;
+  }
 
-    public void setContext(final ViolationCheckContext context) {
-        this.context = context;
-    }
+  public void setContext(final ViolationCheckContext context) {
+    this.context = context;
+  }
 }

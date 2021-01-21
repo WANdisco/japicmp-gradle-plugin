@@ -19,19 +19,19 @@ import java.io.Serializable;
 import java.util.Map;
 
 public class RuleConfiguration<T> implements Serializable {
-    protected final Class<? extends T> ruleClass;
-    protected final Map<String, String> arguments;
+  protected final Class<? extends T> ruleClass;
+  protected final Map<String, String> arguments;
 
-    public RuleConfiguration(final Class<? extends T> ruleClass, final Map<String, String> arguments) {
-        this.ruleClass = ruleClass;
-        this.arguments = arguments;
-    }
+  public RuleConfiguration(final Class<? extends T> ruleClass, final Map<String, String> arguments) {
+    this.ruleClass = ruleClass;
+    this.arguments = arguments;
+  }
 
-    public Class<? extends T> getRuleClass() {
-        return ruleClass;
-    }
+  public Class<? extends T> getRuleClass() {
+    return ruleClass;
+  }
 
-    public Map<String, String> getArguments() {
-        return arguments;
-    }
+  public Map<String, String> getArguments() {
+    return arguments;
+  }
 }

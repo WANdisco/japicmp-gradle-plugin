@@ -18,5 +18,5 @@ package me.champeau.gradle.japicmp.report;
 import japicmp.model.JApiCompatibility;
 
 public interface ViolationRule {
-    Violation maybeViolation(JApiCompatibility member);
+  Violation maybeViolation(JApiCompatibility member);
 }

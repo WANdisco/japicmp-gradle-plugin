@@ -20,14 +20,14 @@ import japicmp.model.JApiChangeStatus;
 import java.util.Map;
 
 public class StatusChangeViolationRuleConfiguration extends ViolationRuleConfiguration {
-    private final JApiChangeStatus status;
+  private final JApiChangeStatus status;
 
-    public StatusChangeViolationRuleConfiguration(final Class<? extends ViolationRule> ruleClass, final Map<String, String> arguments, final JApiChangeStatus status) {
-        super(ruleClass, arguments);
-        this.status = status;
-    }
+  public StatusChangeViolationRuleConfiguration(final Class<? extends ViolationRule> ruleClass, final Map<String, String> arguments, final JApiChangeStatus status) {
+    super(ruleClass, arguments);
+    this.status = status;
+  }
 
-    public JApiChangeStatus getStatus() {
-        return status;
-    }
+  public JApiChangeStatus getStatus() {
+    return status;
+  }
 }

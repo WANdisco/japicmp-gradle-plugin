@@ -25,10 +25,10 @@ import java.util.Set;
  */
 public class UnchangedMemberRule extends AbstractRecordingSeenMembers {
 
-    @Override
-    public Violation maybeAddViolation(final JApiCompatibility member) {
-        Set<JApiCompatibility> seen = getContext().getUserData(RecordSeenMembersSetup.SEEN);
-        seen.add(member);
-        return null;
-    }
+  @Override
+  public Violation maybeAddViolation(final JApiCompatibility member) {
+    Set<JApiCompatibility> seen = getContext().getUserData(RecordSeenMembersSetup.SEEN);
+    seen.add(member);
+    return null;
+  }
 }

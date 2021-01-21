@@ -20,23 +20,23 @@ import me.champeau.gradle.japicmp.report.Severity;
 import me.champeau.gradle.japicmp.report.Violation;
 
 public class SourceCompatibleRule extends AbstractRecordingSeenMembers {
-    private final Severity severity;
-    private final String message;
+  private final Severity severity;
+  private final String message;
 
-    public SourceCompatibleRule(final Severity severity, String message) {
-        this.severity = severity;
-        this.message = message;
-    }
+  public SourceCompatibleRule(final Severity severity, String message) {
+    this.severity = severity;
+    this.message = message;
+  }
 
-    public SourceCompatibleRule() {
-        this(Severity.warning, "is source compatible");
-    }
+  public SourceCompatibleRule() {
+    this(Severity.warning, "is source compatible");
+  }
 
-    @Override
-    public Violation maybeAddViolation(final JApiCompatibility member) {
-        if (member.isSourceCompatible()) {
-            return Violation.any(member, severity, message);
-        }
-        return null;
+  @Override
+  public Violation maybeAddViolation(final JApiCompatibility member) {
+    if (member.isSourceCompatible()) {
+      return Violation.any(member, severity, message);
     }
+    return null;
+  }
 }

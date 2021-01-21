@@ -22,10 +22,10 @@ import me.champeau.gradle.japicmp.report.ViolationCheckContext;
 import java.util.HashSet;
 
 public class RecordSeenMembersSetup implements SetupRule {
-    static final String SEEN = RecordSeenMembersSetup.class.getName();
+  static final String SEEN = RecordSeenMembersSetup.class.getName();
 
-    @Override
-    public void execute(final ViolationCheckContext violationCheckContext) {
-        violationCheckContext.putUserData(SEEN, new HashSet<JApiCompatibility>());
-    }
+  @Override
+  public void execute(final ViolationCheckContext violationCheckContext) {
+    violationCheckContext.putUserData(SEEN, new HashSet<JApiCompatibility>());
+  }
 }

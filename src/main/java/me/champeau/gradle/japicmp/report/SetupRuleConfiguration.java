@@ -18,7 +18,7 @@ package me.champeau.gradle.japicmp.report;
 import java.util.Map;
 
 public class SetupRuleConfiguration extends RuleConfiguration<SetupRule> {
-    public SetupRuleConfiguration(final Class<? extends SetupRule> ruleClass, final Map<String, String> arguments) {
-        super(ruleClass, arguments);
-    }
+  public SetupRuleConfiguration(final Class<? extends SetupRule> ruleClass, final Map<String, String> arguments) {
+    super(ruleClass, arguments);
+  }
 }

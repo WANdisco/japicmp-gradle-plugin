@@ -21,13 +21,13 @@ import java.io.Serializable;
 
 public class FilterConfiguration implements Serializable {
 
-    protected final Class<? extends Filter> filterClass;
+  protected final Class<? extends Filter> filterClass;
 
-    public FilterConfiguration(Class<? extends Filter> filterClass) {
-        this.filterClass = filterClass;
-    }
+  public FilterConfiguration(Class<? extends Filter> filterClass) {
+    this.filterClass = filterClass;
+  }
 
-    public Class<? extends Filter> getFilterClass() {
-        return filterClass;
-    }
+  public Class<? extends Filter> getFilterClass() {
+    return filterClass;
+  }
 }

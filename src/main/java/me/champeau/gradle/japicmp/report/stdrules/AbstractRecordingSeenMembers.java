@@ -26,23 +26,23 @@ import java.util.Set;
  * add them multiple times. This rule needs to be setup with {@link RecordSeenMembersSetup}
  */
 public abstract class AbstractRecordingSeenMembers extends AbstractContextAwareViolationRule {
-    @Override
-    public final Violation maybeViolation(final JApiCompatibility member) {
-        Set<JApiCompatibility> seen = getContext().getUserData(RecordSeenMembersSetup.SEEN);
-        if (seen == null) {
-            throw new IllegalStateException(
-                    "The " + this.getClass().getSimpleName() + " rule cannot be used if the " +
-                    RecordSeenMembersSetup.class.getSimpleName() + " setup rule hasn't been added.");
-        }
-        if (!seen.contains(member)) {
-            Violation violation = maybeAddViolation(member);
-            if (violation != null) {
-                seen.add(member);
-                return violation;
-            }
-        }
-        return null;
+  @Override
+  public final Violation maybeViolation(final JApiCompatibility member) {
+    Set<JApiCompatibility> seen = getContext().getUserData(RecordSeenMembersSetup.SEEN);
+    if (seen == null) {
+      throw new IllegalStateException(
+          "The " + this.getClass().getSimpleName() + " rule cannot be used if the " +
+              RecordSeenMembersSetup.class.getSimpleName() + " setup rule hasn't been added.");
     }
+    if (!seen.contains(member)) {
+      Violation violation = maybeAddViolation(member);
+      if (violation != null) {
+        seen.add(member);
+        return violation;
+      }
+    }
+    return null;
+  }
 
-    protected abstract Violation maybeAddViolation(final JApiCompatibility member);
+  protected abstract Violation maybeAddViolation(final JApiCompatibility member);
 }

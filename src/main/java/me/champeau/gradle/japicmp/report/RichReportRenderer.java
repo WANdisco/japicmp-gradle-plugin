@@ -18,5 +18,5 @@ package me.champeau.gradle.japicmp.report;
 import java.io.File;
 
 public interface RichReportRenderer {
-    void render(File destinationDir, RichReportData data);
+  void render(File destinationDir, RichReportData data);
 }

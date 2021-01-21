@@ -20,14 +20,14 @@ import japicmp.model.JApiCompatibilityChange;
 import java.util.Map;
 
 public class CompatibilityChangeViolationRuleConfiguration extends ViolationRuleConfiguration {
-    private final JApiCompatibilityChange change;
+  private final JApiCompatibilityChange change;
 
-    public CompatibilityChangeViolationRuleConfiguration(final Class<? extends ViolationRule> ruleClass, final Map<String, String> arguments, final JApiCompatibilityChange change) {
-        super(ruleClass, arguments);
-        this.change = change;
-    }
+  public CompatibilityChangeViolationRuleConfiguration(final Class<? extends ViolationRule> ruleClass, final Map<String, String> arguments, final JApiCompatibilityChange change) {
+    super(ruleClass, arguments);
+    this.change = change;
+  }
 
-    public JApiCompatibilityChange getChange() {
-        return change;
-    }
+  public JApiCompatibilityChange getChange() {
+    return change;
+  }
 }

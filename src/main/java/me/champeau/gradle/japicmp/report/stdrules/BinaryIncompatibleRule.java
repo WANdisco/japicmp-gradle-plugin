@@ -20,21 +20,21 @@ import me.champeau.gradle.japicmp.report.Severity;
 import me.champeau.gradle.japicmp.report.Violation;
 
 public class BinaryIncompatibleRule extends AbstractRecordingSeenMembers {
-    private final Severity severity;
+  private final Severity severity;
 
-    public BinaryIncompatibleRule(final Severity severity) {
-        this.severity = severity;
-    }
+  public BinaryIncompatibleRule(final Severity severity) {
+    this.severity = severity;
+  }
 
-    public BinaryIncompatibleRule() {
-        this(Severity.error);
-    }
+  public BinaryIncompatibleRule() {
+    this(Severity.error);
+  }
 
-    @Override
-    public Violation maybeAddViolation(final JApiCompatibility member) {
-        if (!member.isBinaryCompatible()) {
-            return Violation.notBinaryCompatible(member, severity);
-        }
-        return null;
+  @Override
+  public Violation maybeAddViolation(final JApiCompatibility member) {
+    if (!member.isBinaryCompatible()) {
+      return Violation.notBinaryCompatible(member, severity);
     }
+    return null;
+  }
 }
