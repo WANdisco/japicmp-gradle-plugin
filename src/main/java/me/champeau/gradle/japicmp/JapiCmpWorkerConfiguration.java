@@ -51,63 +51,63 @@ public class JapiCmpWorkerConfiguration implements Serializable {
   protected final boolean failOnModification;
   protected final File buildDir;
   protected final RichReport richReport;
-    protected final File compatibilityChangesFilterFile;
+  protected final File compatibilityChangesFilterFile;
 
   public JapiCmpWorkerConfiguration(boolean includeSynthetic,
-                                      boolean ignoreMissingClasses,
-                                      List<String> packageIncludes,
-                                      List<String> packageExcludes,
-                                      List<String> classIncludes,
-                                      List<String> classExcludes,
-                                      List<String> methodIncludes,
-                                      List<String> methodExcludes,
-                                      List<String> fieldIncludes,
-                                      List<String> fieldExcludes,
-                                      List<String> annotationIncludes,
-                                      List<String> annotationExcludes,
-                                      List<FilterConfiguration> includeFilters,
-                                      List<FilterConfiguration> excludeFilters,
-                                      List<Archive> oldClasspath,
-                                      List<Archive> newClasspath,
-                                      List<Archive> oldArchives,
-                                      List<Archive> newArchives,
-                                      boolean onlyModified,
-                                      boolean onlyBinaryIncompatibleModified,
-                                      boolean failOnSourceIncompatibility,
-                                      String accessModifier,
-                                      File xmlOutputFile,
-                                      File htmlOutputFile,
-                                      File txtOutputFile,
-                                      boolean failOnModification,
-                                      File buildDir,
-                                      RichReport richReport,
-                                      File compatibilityChangesFilterFile) {
-        this.includeSynthetic = includeSynthetic;
-        this.ignoreMissingClasses = ignoreMissingClasses;
-        this.packageIncludes = packageIncludes;
-        this.packageExcludes = packageExcludes;
-        this.classIncludes = classIncludes;
-        this.classExcludes = classExcludes;
-        this.methodIncludes = methodIncludes;
-        this.methodExcludes = methodExcludes;
-        this.fieldIncludes = fieldIncludes;
-        this.fieldExcludes = fieldExcludes;
-        this.annotationIncludes = annotationIncludes;
-        this.annotationExcludes = annotationExcludes;
-        this.includeFilters = includeFilters;
-        this.excludeFilters = excludeFilters;
-        this.oldClasspath = oldClasspath;
-        this.newClasspath = newClasspath;
-        this.oldArchives = oldArchives;
-        this.newArchives = newArchives;
-        this.onlyModified = onlyModified;
-        this.onlyBinaryIncompatibleModified = onlyBinaryIncompatibleModified;
-        this.failOnSourceIncompatibility = failOnSourceIncompatibility;
-        this.accessModifier = accessModifier;
-        this.xmlOutputFile = xmlOutputFile;
-        this.htmlOutputFile = htmlOutputFile;
-        this.txtOutputFile = txtOutputFile;
-        this.compatibilityChangesFilterFile = compatibilityChangesFilterFile;
+                                    boolean ignoreMissingClasses,
+                                    List<String> packageIncludes,
+                                    List<String> packageExcludes,
+                                    List<String> classIncludes,
+                                    List<String> classExcludes,
+                                    List<String> methodIncludes,
+                                    List<String> methodExcludes,
+                                    List<String> fieldIncludes,
+                                    List<String> fieldExcludes,
+                                    List<String> annotationIncludes,
+                                    List<String> annotationExcludes,
+                                    List<FilterConfiguration> includeFilters,
+                                    List<FilterConfiguration> excludeFilters,
+                                    List<Archive> oldClasspath,
+                                    List<Archive> newClasspath,
+                                    List<Archive> oldArchives,
+                                    List<Archive> newArchives,
+                                    boolean onlyModified,
+                                    boolean onlyBinaryIncompatibleModified,
+                                    boolean failOnSourceIncompatibility,
+                                    String accessModifier,
+                                    File xmlOutputFile,
+                                    File htmlOutputFile,
+                                    File txtOutputFile,
+                                    boolean failOnModification,
+                                    File buildDir,
+                                    RichReport richReport,
+                                    File compatibilityChangesFilterFile) {
+    this.includeSynthetic = includeSynthetic;
+    this.ignoreMissingClasses = ignoreMissingClasses;
+    this.packageIncludes = packageIncludes;
+    this.packageExcludes = packageExcludes;
+    this.classIncludes = classIncludes;
+    this.classExcludes = classExcludes;
+    this.methodIncludes = methodIncludes;
+    this.methodExcludes = methodExcludes;
+    this.fieldIncludes = fieldIncludes;
+    this.fieldExcludes = fieldExcludes;
+    this.annotationIncludes = annotationIncludes;
+    this.annotationExcludes = annotationExcludes;
+    this.includeFilters = includeFilters;
+    this.excludeFilters = excludeFilters;
+    this.oldClasspath = oldClasspath;
+    this.newClasspath = newClasspath;
+    this.oldArchives = oldArchives;
+    this.newArchives = newArchives;
+    this.onlyModified = onlyModified;
+    this.onlyBinaryIncompatibleModified = onlyBinaryIncompatibleModified;
+    this.failOnSourceIncompatibility = failOnSourceIncompatibility;
+    this.accessModifier = accessModifier;
+    this.xmlOutputFile = xmlOutputFile;
+    this.htmlOutputFile = htmlOutputFile;
+    this.txtOutputFile = txtOutputFile;
+    this.compatibilityChangesFilterFile = compatibilityChangesFilterFile;
     this.failOnModification = failOnModification | failOnSourceIncompatibility;
     this.buildDir = buildDir;
     this.richReport = richReport;

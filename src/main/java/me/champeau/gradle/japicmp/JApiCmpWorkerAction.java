@@ -63,8 +63,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements Runnable {
 
@@ -207,11 +207,13 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
 
     if (compatibilityChangesFilterFile != null) {
       CompatibilityChangesFilter filter = new CompatibilityChangesFilter(compatibilityChangesFilterFile);
-      Set<String> collect = oldArchives.stream().map(Archive::getFileName)
-          .collect(Collectors.toSet());
-      Set<String> collect1 = newArchives.stream().map(Archive::getFileName)
-          .collect(Collectors.toCollection(() -> collect));
-      filter.filterChanges(collect1, jApiClasses);
+      filter.filterChanges(
+          Stream.concat(
+              oldArchives.stream().map(Archive::getFileName),
+              newArchives.stream().map(Archive::getFileName)
+          ).collect(Collectors.toSet()),
+          jApiClasses
+      );
     }
 
     options.setOutputOnlyModifications(onlyModified);

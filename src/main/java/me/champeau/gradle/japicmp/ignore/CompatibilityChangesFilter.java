@@ -43,11 +43,15 @@ public class CompatibilityChangesFilter {
       e.printStackTrace();
     }
 
-    projects = new ArrayList<>();
+    projects = fillProjects(objects);
+  }
+
+  private List<Project> fillProjects(HashMap<String, List<Map<String, String>>> objects) {
+    List<Project> result = new ArrayList<>();
     if (objects != null) {
       for (Map.Entry<String, List<Map<String, String>>> projectEntry : objects.entrySet()) {
         Project project = new Project(projectEntry.getKey());
-        projects.add(project);
+        result.add(project);
         List<Map<String, String>> value = projectEntry.getValue();
         if (value == null || value.isEmpty()) continue;
         for (Map<String, String> entity : value) {
@@ -55,7 +59,7 @@ public class CompatibilityChangesFilter {
         }
       }
     }
-    System.out.println(projects);
+    return result;
   }
 
 
@@ -94,9 +98,9 @@ public class CompatibilityChangesFilter {
       }
     }
     if (version == null) {
-      throw new NullPointerException();
+      throw new NullPointerException("Missing version property in remove element");
     } else if (entity == null) {
-      throw new NullPointerException();
+      throw new NullPointerException("Missing entity property in change element");
     }
     Element<?> element = Parser.parseElement(entity);
 
@@ -131,11 +135,11 @@ public class CompatibilityChangesFilter {
       }
     }
     if (version == null) {
-      throw new NullPointerException();
+      throw new NullPointerException("Missing version property in change element");
     } else if (prevEntity == null) {
-      throw new NullPointerException();
+      throw new NullPointerException("Missing prevEntity property in change element");
     } else if (newEntity == null) {
-      throw new NullPointerException();
+      throw new NullPointerException("Missing newEntity property in change element");
     }
 
     Element<?> prevElement = Parser.parseElement(prevEntity);
