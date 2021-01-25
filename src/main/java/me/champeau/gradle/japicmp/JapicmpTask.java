@@ -1,6 +1,7 @@
 package me.champeau.gradle.japicmp;
 
 import japicmp.filter.Filter;
+import me.champeau.gradle.japicmp.archive.Archive;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
 import me.champeau.gradle.japicmp.ignore.Parser;
 import me.champeau.gradle.japicmp.report.RichReport;
@@ -16,9 +17,12 @@ import org.gradle.api.file.FileCollection;
 import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.CompileClasspath;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.Nested;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.PathSensitive;
+import org.gradle.api.tasks.PathSensitivity;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.workers.IsolationMode;
 import org.gradle.workers.WorkerConfiguration;
@@ -196,14 +200,6 @@ public class JapicmpTask extends DefaultTask {
       }
     } catch (Exception ignored) { }
     return "1.0";
-  }
-
-
-  public static void main(String[] args) {
-    String s = tryExtractVersion(new File("test1-1.1.jar"));
-    assert s.equals("1.1");
-    String s1 = tryExtractVersion(new File("test1-1.2-SNAPSHOT.jar"));
-    assert s1.equals("1.2-SNAPSHOT");
   }
 
   private void collectArchives(final List<Archive> archives, ResolvedDependency resolvedDependency) {
@@ -493,7 +489,8 @@ public class JapicmpTask extends DefaultTask {
   }
 
   @Optional
-  @Nested
+  @InputFile
+  @PathSensitive(PathSensitivity.RELATIVE)
   public File getCompatibilityChangesFilterFile() {
     return compatibilityChangesFilterFile;
   }
