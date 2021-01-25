@@ -10,7 +10,7 @@ public class Archive implements Serializable {
   private final File file;
   private final String version;
 
-  public Archive(final File file, final String version) {
+  public Archive(File file, String version) {
     this.file = file;
     this.version = version;
   }
@@ -27,10 +27,13 @@ public class Archive implements Serializable {
   
   public String getFileName() {
     String name = file.getName();
-    String[] nameAndExtension = Parser.splitByLastDotChar(name);
-    String s = nameAndExtension[0];
-    int i = s.lastIndexOf(version);
-    return s.substring(0, i - 1);
+    try {
+      String[] nameAndExtension = Parser.splitByLastDotChar(name);
+      String s = nameAndExtension[0];
+      int i = s.lastIndexOf(version);
+      return s.substring(0, i - 1);
+    } catch (Exception ignored) {}
+    return name;
   }
 
   public JApiCmpArchive toJapicmpArchive() {

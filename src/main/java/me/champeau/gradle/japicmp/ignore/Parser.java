@@ -6,6 +6,7 @@ import me.champeau.gradle.japicmp.ignore.element.Element;
 import me.champeau.gradle.japicmp.ignore.element.FieldElement;
 import me.champeau.gradle.japicmp.ignore.element.MethodElement;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -85,5 +86,26 @@ public class Parser {
     }
 
     return new String[] {s.substring(0, lastDot), s.substring(lastDot + 1)};
+  }
+
+  public static String tryExtractVersion(File file) {
+    try {
+      String name = file.getName();
+      String[] nameAndExtension = splitByLastDotChar(name);
+      String fileName = nameAndExtension[0];
+      int minusCount = fileName.contains("SNAPSHOT") ? 2 : 1;
+      int i = fileName.length();
+      while (--i >= 0 && minusCount > 0) {
+        char c = fileName.charAt(i);
+        if (c == '-') minusCount--;
+      }
+      if (minusCount == 0) {
+        String version = fileName.substring(i + 2);
+        if (version.contains(".") && !version.endsWith(".") && !version.endsWith(".-SNAPSHOT")) {
+          return version;
+        }
+      }
+    } catch (Exception ignored) { }
+    return file.getName().contains("SNAPSHOT") ? "1.0-SNAPSHOT" : "1.0";
   }
 }

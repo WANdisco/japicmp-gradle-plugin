@@ -8,6 +8,8 @@ import me.champeau.gradle.japicmp.ignore.element.MethodElement;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.File;
+
 public class ParserTest {
   @Test
   public void parserTest() {
@@ -64,5 +66,18 @@ public class ParserTest {
 
     Assert.assertEquals(classElement.getClassName(), "Class");
     Assert.assertEquals(classElement.getPackage(), "com.test");
+  }
+
+  @Test
+  public void testVersionExtracter() {
+    File folder = new File("path/to/file");
+    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test.jar")));
+    Assert.assertEquals("2.0", Parser.tryExtractVersion(new File(folder, "test-2.0.jar")));
+    Assert.assertEquals("2.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-2.0-SNAPSHOT.jar")));
+    Assert.assertEquals("2.0.2.3.4", Parser.tryExtractVersion(new File(folder, "test-2.0.2.3.4.jar")));
+    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-2.jar")));
+    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-.jar")));
+    Assert.assertEquals("1.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-SNAPSHOT.jar")));
+    Assert.assertEquals("1.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-2.-SNAPSHOT.jar")));
   }
 }

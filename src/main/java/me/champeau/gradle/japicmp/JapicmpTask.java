@@ -1,7 +1,6 @@
 package me.champeau.gradle.japicmp;
 
 import japicmp.filter.Filter;
-import me.champeau.gradle.japicmp.archive.Archive;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
 import me.champeau.gradle.japicmp.ignore.Parser;
 import me.champeau.gradle.japicmp.report.RichReport;
@@ -179,27 +178,9 @@ public class JapicmpTask extends DefaultTask {
     Set<File> files = fc.getFiles();
     List<Archive> archives = new ArrayList<>(files.size());
     for (File file : files) {
-      archives.add(new Archive(file, tryExtractVersion(file)));
+      archives.add(new Archive(file, Parser.tryExtractVersion(file)));
     }
     return archives;
-  }
-
-  private static String tryExtractVersion(File file) {
-    try {
-      String name = file.getName();
-      String[] nameAndExtension = Parser.splitByLastDotChar(name);
-      String fileName = nameAndExtension[0];
-      int minusCount = fileName.contains("SNAPSHOT") ? 2 : 1;
-      int i = fileName.length();
-      while (--i >= 0 && minusCount > 0) {
-        char c = fileName.charAt(i);
-        if (c == '-') minusCount--;
-      }
-      if (minusCount == 0) {
-        return fileName.substring(i + 2);
-      }
-    } catch (Exception ignored) { }
-    return "1.0";
   }
 
   private void collectArchives(final List<Archive> archives, ResolvedDependency resolvedDependency) {
