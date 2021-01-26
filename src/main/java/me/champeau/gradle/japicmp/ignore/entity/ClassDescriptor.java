@@ -4,9 +4,9 @@ import japicmp.model.JApiClass;
 import japicmp.model.JApiConstructor;
 import japicmp.model.JApiField;
 import japicmp.model.JApiMethod;
+import me.champeau.gradle.japicmp.archive.VersionsRange;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ClassDescriptor {
@@ -15,7 +15,7 @@ public class ClassDescriptor {
   private final Map<String, RemoveMethodEntity> removedMethods = new HashMap<>();
   private final Map<String, ChangeMethodEntity> changedMethods = new HashMap<>();
 
-  private final Map<String, RemoveFieldEntity> removedField = new HashMap<>();
+  private final Map<String, RemoveFieldEntity> removedFields = new HashMap<>();
   private final Map<String, ChangeFieldEntity> changedFields = new HashMap<>();
 
   private final Map<String, RemoveConstructorEntity> removedConstructors = new HashMap<>();
@@ -28,12 +28,6 @@ public class ClassDescriptor {
     this.fullName = packageClassName;
   }
 
-  private void fill(List<Entity> entities) {
-    for (Entity entity : entities) {
-      add(entity);
-    }
-  }
-
   public void add(Entity entity) {
     if (entity instanceof RemoveMethodEntity) {
       RemoveMethodEntity castedEntity = (RemoveMethodEntity) entity;
@@ -43,7 +37,7 @@ public class ClassDescriptor {
       changedMethods.put(castedEntity.getName(), castedEntity);
     } else if (entity instanceof RemoveFieldEntity) {
       RemoveFieldEntity castedEntity = (RemoveFieldEntity) entity;
-      removedField.put((castedEntity).getName(), castedEntity);
+      removedFields.put((castedEntity).getName(), castedEntity);
     } else if (entity instanceof ChangeFieldEntity) {
       ChangeFieldEntity castedEntity = (ChangeFieldEntity) entity;
       changedFields.put((castedEntity).getFirstFieldName(), castedEntity);
@@ -73,63 +67,63 @@ public class ClassDescriptor {
     return null;
   }
 
-  public boolean validateChangeMethod(JApiMethod oldMethod, JApiMethod newMethod) {
+  public boolean validateChangeMethod(JApiMethod oldMethod, JApiMethod newMethod, VersionsRange versions) {
     ChangeMethodEntity changeMethodEntity = changedMethods.get(oldMethod.getName());
     if (changeMethodEntity == null) return false;
 
-    return changeMethodEntity.validate(oldMethod, newMethod);
+    return versions.isAffectVersion(changeMethodEntity.getVersion()) && changeMethodEntity.validate(oldMethod, newMethod);
   }
 
-  public boolean validateRemoveMethod(JApiMethod method) {
-    if (validateRemoveClass(method.getjApiClass())) {
+  public boolean validateRemoveMethod(JApiMethod method, VersionsRange versions) {
+    if (validateRemoveClass(method.getjApiClass(), versions)) {
       return true;
     }
 
     RemoveMethodEntity removeMethodEntity = removedMethods.get(method.getName());
     if (removeMethodEntity == null) return false;
 
-    return removeMethodEntity.validate(method);
+    return versions.isAffectVersion(removeMethodEntity.getVersion()) && removeMethodEntity.validate(method);
   }
 
-  public boolean validateChangeField(JApiField oldField, JApiField newField) {
+  public boolean validateChangeField(JApiField oldField, JApiField newField, VersionsRange versions) {
     ChangeFieldEntity changeFieldEntity = changedFields.get(oldField.getName());
     if (changeFieldEntity == null) return false;
 
-    return changeFieldEntity.validate(oldField, newField);
+    return versions.isAffectVersion(changeFieldEntity.getVersion()) && changeFieldEntity.validate(oldField, newField);
   }
 
-  public boolean validateRemoveField(JApiField field) {
-    if (validateRemoveClass(field.getjApiClass())) {
+  public boolean validateRemoveField(JApiField field, VersionsRange versions) {
+    if (validateRemoveClass(field.getjApiClass(), versions)) {
       return true;
     }
-    RemoveFieldEntity removeFieldEntity = removedField.get(field.getName());
+    RemoveFieldEntity removeFieldEntity = removedFields.get(field.getName());
     if (removeFieldEntity == null) return false;
 
-    return removeFieldEntity.validate(field);
+    return versions.isAffectVersion(removeFieldEntity.getVersion()) && removeFieldEntity.validate(field);
   }
 
-  public boolean validateChangeConstructor(JApiConstructor oldConstructor, JApiConstructor newConstructor) {
+  public boolean validateChangeConstructor(JApiConstructor oldConstructor, JApiConstructor newConstructor, VersionsRange versions) {
     ChangeConstructorEntity changeConstructorEntity = changedConstructors.get(oldConstructor.getName());
     if (changeConstructorEntity == null) return false;
 
-    return changeConstructorEntity.validate(oldConstructor, newConstructor);
+    return versions.isAffectVersion(changeConstructorEntity.getVersion()) && changeConstructorEntity.validate(oldConstructor, newConstructor);
   }
 
-  public boolean validateRemoveConstructor(JApiConstructor constructor) {
-    if (validateRemoveClass(constructor.getjApiClass())) {
+  public boolean validateRemoveConstructor(JApiConstructor constructor, VersionsRange versions) {
+    if (validateRemoveClass(constructor.getjApiClass(), versions)) {
       return true;
     }
 
     RemoveConstructorEntity removeConstructorEntity = removedConstructors.get(constructor.getName());
     if (removeConstructorEntity == null) return false;
 
-    return removeConstructorEntity.validate(constructor);
+    return versions.isAffectVersion(removeConstructorEntity.getVersion()) && removeConstructorEntity.validate(constructor);
   }
 
-  public boolean validateRemoveClass(JApiClass clazz) {
+  public boolean validateRemoveClass(JApiClass clazz, VersionsRange versions) {
     RemoveClassEntity removeClassEntity = removeClasses.get(clazz.getFullyQualifiedName());
     if (removeClassEntity == null) return false;
 
-    return removeClassEntity.validate(clazz);
+    return versions.isAffectVersion(removeClassEntity.getVersion()) && removeClassEntity.validate(clazz);
   }
 }

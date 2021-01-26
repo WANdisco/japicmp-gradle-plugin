@@ -18,8 +18,14 @@ sourceSets {
     main2
 }
 
-task jarv2(type: Jar) {
-    classifier = 'v2'
+jar {
+    baseName = "test1"
+    version = "2.10.0.0"
+}
+
+task jarv2(type:Jar) {
+    version = "2.11.0.0"
+    baseName = "test1"
     from sourceSets.main2.output
 }
 

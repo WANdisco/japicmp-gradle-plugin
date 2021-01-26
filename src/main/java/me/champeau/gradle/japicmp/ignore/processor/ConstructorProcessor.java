@@ -4,6 +4,7 @@ import japicmp.model.JApiBehavior;
 import japicmp.model.JApiChangeStatus;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiConstructor;
+import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ConstructorProcessor {
     this.manager = manager;
   }
 
-  public void process(List<JApiConstructor> constructors) {
+  public void process(List<JApiConstructor> constructors, VersionsRange versions) {
     Changer<JApiConstructor, JApiChangeStatus> changer = new Changer<>(JApiBehavior::getName);
     for (JApiConstructor constructor : constructors) {
       JApiChangeStatus changeStatus = constructor.getChangeStatus();
@@ -30,21 +31,21 @@ public class ConstructorProcessor {
       }
     }
 
-    doProcess(changer);
+    doProcess(changer, versions);
   }
 
-  private void doProcess(Changer<JApiConstructor, JApiChangeStatus> changer) {
+  private void doProcess(Changer<JApiConstructor, JApiChangeStatus> changer, VersionsRange versions) {
     for (Map.Entry<JApiConstructor, JApiConstructor> entry : changer.getMatches().entrySet()) {
       JApiConstructor key = entry.getKey();
       JApiConstructor value = entry.getValue();
-      if (manager.validateChangeConstructor(key, value)) {
+      if (manager.validateChangeConstructor(key, value, versions)) {
         classMutator.removeCompatibilityChange(key, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
         classMutator.removeCompatibilityChange(value, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
       }
     }
 
     for (JApiConstructor unmatchedChange : changer.getUnmatchedChanges()) {
-      if (manager.validateRemoveConstructor(unmatchedChange)) {
+      if (manager.validateRemoveConstructor(unmatchedChange, versions)) {
         classMutator.removeCompatibilityChange(unmatchedChange, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
       }
     }

@@ -1,0 +1,10 @@
+test1:
+  - change:
+    prevEntity: me.champeau.gradle.japicmp.TestClass.test3():java.lang.String
+    newEntity: me.champeau.gradle.japicmp.TestClass.test3():java.lang.Integer
+    version: 2.11.1.0
+
+  - change:
+    prevEntity: me.champeau.gradle.japicmp.TestClass.test2(java.lang.String):void
+    newEntity: me.champeau.gradle.japicmp.TestClass.test2(java.lang.String,java.lang.String):void
+    version: 2.10.1.0

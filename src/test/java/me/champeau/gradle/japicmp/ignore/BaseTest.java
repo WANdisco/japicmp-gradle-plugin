@@ -27,7 +27,7 @@ public class BaseTest {
     Map<String, String> argsMap = new HashMap<>();
     for (int i = 0; i < args.length; i++) {
       String arg = args[i];
-      argsMap.put("arg0", arg);
+      argsMap.put("arg" + i, arg);
     }
     return new MethodElement(strings[0], strings[1], returnedType, methodName, argsMap);
   }

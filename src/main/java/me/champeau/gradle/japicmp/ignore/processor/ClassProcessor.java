@@ -4,6 +4,7 @@ import japicmp.model.JApiClass;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiImplementedInterface;
 import japicmp.model.JApiSuperclass;
+import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
 
 import java.util.ArrayList;
@@ -24,16 +25,18 @@ public class ClassProcessor {
     constructorProcessor = new ConstructorProcessor(classMutator, manager);
   }
 
-  public void processClass(JApiClass clazz) {
-    doProcessClass(clazz);
-    methodProcessor.process(clazz.getMethods());
-    fieldProcessor.process(clazz.getFields());
-    constructorProcessor.process(clazz.getConstructors());
-    classMutator.tryClearClass(clazz);
+  public void process(List<JApiClass> classes, VersionsRange versions) {
+    for (JApiClass clazz : classes) {
+      doProcessClass(clazz, versions);
+      methodProcessor.process(clazz.getMethods(), versions);
+      fieldProcessor.process(clazz.getFields(), versions);
+      constructorProcessor.process(clazz.getConstructors(), versions);
+      classMutator.tryClearClass(clazz);
+    }
   }
 
-  private void doProcessClass(JApiClass clazz) {
-    if (manager.validateRemoveClass(clazz)) {
+  private void doProcessClass(JApiClass clazz, VersionsRange versions) {
+    if (manager.validateRemoveClass(clazz, versions)) {
       List<JApiCompatibilityChange> compatibilityChanges = new ArrayList<>(clazz.getCompatibilityChanges());
       for (JApiCompatibilityChange compatibilityChange : compatibilityChanges) {
         switch (compatibilityChange) {

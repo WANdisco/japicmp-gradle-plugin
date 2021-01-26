@@ -33,6 +33,8 @@ import japicmp.output.stdout.StdoutOutputGenerator;
 import japicmp.output.xml.XmlOutput;
 import japicmp.output.xml.XmlOutputGenerator;
 import japicmp.output.xml.XmlOutputGeneratorOptions;
+import me.champeau.gradle.japicmp.archive.Archive;
+import me.champeau.gradle.japicmp.archive.Diff;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
 import me.champeau.gradle.japicmp.ignore.CompatibilityChangesFilter;
 import me.champeau.gradle.japicmp.report.CompatibilityChangeViolationRuleConfiguration;
@@ -63,8 +65,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements Runnable {
 
@@ -166,9 +166,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
 
   }
 
-  private static String prettyPrint(List<JApiCmpArchive> archives) {
+  private static String prettyPrint(List<Archive> archives) {
     StringBuilder sb = new StringBuilder();
-    for (JApiCmpArchive archive : archives) {
+    for (Archive archive : archives) {
       if (sb.length() > 0) {
         sb.append(", ");
       }
@@ -201,19 +201,12 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     Options options = Options.newDefault();
     options.setOldClassPath(japicmp.util.Optional.of(toClasspath(oldClasspath)));
     options.setNewClassPath(japicmp.util.Optional.of(toClasspath(newClasspath)));
-    List<JApiCmpArchive> baseline = toJapiCmpArchives(oldArchives);
-    List<JApiCmpArchive> current = toJapiCmpArchives(newArchives);
-    List<JApiClass> jApiClasses = new ArrayList<>(jarArchiveComparator.compare(baseline, current));
+    Diff diff = new Diff(jarArchiveComparator, oldArchives, newArchives);
+    List<JApiClass> jApiClasses = diff.classes();
 
     if (compatibilityChangesFilterFile != null) {
       CompatibilityChangesFilter filter = new CompatibilityChangesFilter(compatibilityChangesFilterFile);
-      filter.filterChanges(
-          Stream.concat(
-              oldArchives.stream().map(Archive::getFileName),
-              newArchives.stream().map(Archive::getFileName)
-          ).collect(Collectors.toSet()),
-          jApiClasses
-      );
+      filter.filterChanges(diff);
     }
 
     options.setOutputOnlyModifications(onlyModified);
@@ -323,9 +316,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
         reportLink = null;
       }
       StringBuilder message = new StringBuilder("Detected binary changes between ")
-          .append(prettyPrint(current))
+          .append(prettyPrint(newArchives))
           .append(" and ")
-          .append(prettyPrint(baseline));
+          .append(prettyPrint(oldArchives));
       if (reportLink != null) {
         message.append(".").append(System.lineSeparator()).append(System.lineSeparator());
         message.append("See failure report at ").append(reportLink);

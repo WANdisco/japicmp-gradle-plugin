@@ -73,11 +73,44 @@ public class ParserTest {
     File folder = new File("path/to/file");
     Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test.jar")));
     Assert.assertEquals("2.0", Parser.tryExtractVersion(new File(folder, "test-2.0.jar")));
-    Assert.assertEquals("2.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-2.0-SNAPSHOT.jar")));
+    Assert.assertEquals("2.0", Parser.tryExtractVersion(new File(folder, "test-2.0-SNAPSHOT.jar")));
     Assert.assertEquals("2.0.2.3.4", Parser.tryExtractVersion(new File(folder, "test-2.0.2.3.4.jar")));
-    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-2.jar")));
+    Assert.assertEquals("2", Parser.tryExtractVersion(new File(folder, "test-2.jar")));
     Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-.jar")));
-    Assert.assertEquals("1.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-SNAPSHOT.jar")));
-    Assert.assertEquals("1.0-SNAPSHOT", Parser.tryExtractVersion(new File(folder, "test-2.-SNAPSHOT.jar")));
+    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-SNAPSHOT.jar")));
+    Assert.assertEquals("1.0", Parser.tryExtractVersion(new File(folder, "test-2.-SNAPSHOT.jar")));
+  }
+
+  @Test
+  public void testJarInfoParser() {
+    Parser.JarFileInfo fileInfo0 = new Parser.JarFileInfo(new File("test.jar"));
+    Assert.assertEquals("test", fileInfo0.getArchiveName());
+    Assert.assertNull(fileInfo0.getArchiveVersion());
+    Assert.assertNull(fileInfo0.getArchiveClassifier());
+    Assert.assertEquals("jar", fileInfo0.getArchiveExtension());
+
+    Parser.JarFileInfo fileInfo = new Parser.JarFileInfo(new File("test-2.1.jar"));
+    Assert.assertEquals("test", fileInfo.getArchiveName());
+    Assert.assertEquals("2.1", fileInfo.getArchiveVersion());
+    Assert.assertNull(fileInfo.getArchiveClassifier());
+    Assert.assertEquals("jar", fileInfo.getArchiveExtension());
+
+    Parser.JarFileInfo fileInfo1 = new Parser.JarFileInfo(new File("test-2-SNAPSHOT.jar"));
+    Assert.assertEquals("test", fileInfo1.getArchiveName());
+    Assert.assertEquals("2", fileInfo1.getArchiveVersion());
+    Assert.assertEquals("SNAPSHOT", fileInfo1.getArchiveClassifier());
+    Assert.assertEquals("jar", fileInfo1.getArchiveExtension());
+
+    Parser.JarFileInfo fileInfo2 = new Parser.JarFileInfo(new File("hadoop-hdfs-3.3.0-tests.jar"));
+    Assert.assertEquals("hadoop-hdfs", fileInfo2.getArchiveName());
+    Assert.assertEquals("3.3.0", fileInfo2.getArchiveVersion());
+    Assert.assertEquals("tests", fileInfo2.getArchiveClassifier());
+    Assert.assertEquals("jar", fileInfo2.getArchiveExtension());
+
+    Parser.JarFileInfo fileInfo3 = new Parser.JarFileInfo(new File("test-hdfs.jar"));
+    Assert.assertEquals("test", fileInfo3.getArchiveName());
+    Assert.assertNull(fileInfo3.getArchiveVersion());
+    Assert.assertEquals("hdfs", fileInfo3.getArchiveClassifier());
+    Assert.assertEquals("jar", fileInfo3.getArchiveExtension());
   }
 }

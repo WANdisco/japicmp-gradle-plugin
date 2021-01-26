@@ -3,6 +3,7 @@ package me.champeau.gradle.japicmp.ignore.processor;
 import japicmp.model.JApiBehavior;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiMethod;
+import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class MethodProcessor {
     this.classMutator = classMutator;
   }
 
-  public void process(List<JApiMethod> methods) {
+  public void process(List<JApiMethod> methods, VersionsRange versions) {
     Changer<JApiMethod, JApiCompatibilityChange> changer = new Changer<>(JApiBehavior::getName);
     for (JApiMethod method : methods) {
       List<JApiCompatibilityChange> compatibilityChanges = new ArrayList<>(method.getCompatibilityChanges());
@@ -35,14 +36,14 @@ public class MethodProcessor {
       }
     }
 
-    doProcess(changer);
+    doProcess(changer, versions);
   }
 
-  private void doProcess(Changer<JApiMethod, JApiCompatibilityChange> changer) {
+  private void doProcess(Changer<JApiMethod, JApiCompatibilityChange> changer, VersionsRange versions) {
     for (Map.Entry<JApiMethod, JApiMethod> entry : changer.getMatches().entrySet()) {
       JApiMethod key = entry.getKey();
       JApiMethod value = entry.getValue();
-      if (manager.validateChangeMethod(key, value)) {
+      if (manager.validateChangeMethod(key, value, versions)) {
         classMutator.removeCompatibilityChange(key, changer.getReason(key));
         classMutator.removeCompatibilityChange(value, changer.getReason(value));
       }
@@ -52,12 +53,12 @@ public class MethodProcessor {
       JApiCompatibilityChange reason = changer.getReason(unmatchedChange);
       switch (reason) {
         case METHOD_REMOVED:
-          if (manager.validateRemoveMethod(unmatchedChange)) {
+          if (manager.validateRemoveMethod(unmatchedChange, versions)) {
             classMutator.removeCompatibilityChange(unmatchedChange, reason);
           }
           break;
         case METHOD_RETURN_TYPE_CHANGED:
-          if (manager.validateChangeMethod(unmatchedChange, unmatchedChange)) {
+          if (manager.validateChangeMethod(unmatchedChange, unmatchedChange, versions)) {
             classMutator.removeCompatibilityChange(unmatchedChange, reason);
           }
       }

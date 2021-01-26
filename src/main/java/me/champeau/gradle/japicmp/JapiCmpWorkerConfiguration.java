@@ -15,6 +15,7 @@
  */
 package me.champeau.gradle.japicmp;
 
+import me.champeau.gradle.japicmp.archive.Archive;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
 import me.champeau.gradle.japicmp.report.RichReport;
 

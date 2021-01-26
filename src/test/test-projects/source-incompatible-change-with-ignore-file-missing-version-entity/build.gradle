@@ -3,6 +3,12 @@ plugins {
     id 'me.champeau.gradle.japicmp'
 }
 
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.27'
+}
+
 repositories {
     jcenter()
 }
@@ -10,7 +16,6 @@ repositories {
 sourceSets {
     main2
 }
-
 jar {
     baseName = "test1"
     version = "2.10.0.0"
@@ -21,19 +26,19 @@ task jarv2(type:Jar) {
     baseName = "test1"
     from sourceSets.main2.output
 }
-
-task japicmpOnlyCheckStableApi(type: me.champeau.gradle.japicmp.JapicmpTask) {
+task japiTest(type: me.champeau.gradle.japicmp.JapicmpTask) {
     dependsOn jar, jarv2
     oldClasspath = files(jar.archivePath)
     newClasspath = files(jarv2.archivePath)
-    txtOutputFile = file("$buildDir/reports/japi.txt")
-    annotationIncludes = ['@me.champeau.gradle.japicmp.StableApi']
+    failOnSourceIncompatibility = true
+    failOnModification = true
 }
 
-task japicmpExcludeBetaApi(type: me.champeau.gradle.japicmp.JapicmpTask) {
+task japiTestWithIgnore(type: me.champeau.gradle.japicmp.JapicmpTask) {
     dependsOn jar, jarv2
     oldClasspath = files(jar.archivePath)
     newClasspath = files(jarv2.archivePath)
-    txtOutputFile = file("$buildDir/reports/japi.txt")
-    annotationExcludes = ['@me.champeau.gradle.japicmp.BetaApi']
+    failOnSourceIncompatibility = true
+    failOnModification = true
+    compatibilityChangesFilterFile = file("./config.yml")
 }

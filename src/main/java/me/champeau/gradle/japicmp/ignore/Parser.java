@@ -1,5 +1,6 @@
 package me.champeau.gradle.japicmp.ignore;
 
+import me.champeau.gradle.japicmp.archive.Version;
 import me.champeau.gradle.japicmp.ignore.element.ClassElement;
 import me.champeau.gradle.japicmp.ignore.element.ConstructorElement;
 import me.champeau.gradle.japicmp.ignore.element.Element;
@@ -80,7 +81,15 @@ public class Parser {
   }
 
   public static String[] splitByLastDotChar(String s) {
-    int lastDot = s.lastIndexOf(".");
+    return splitByLastChar(s, '.');
+  }
+
+  public static String[] splitByLastMinusChar(String s) {
+    return splitByLastChar(s, '-');
+  }
+
+  public static String[] splitByLastChar(String s, char c) {
+    int lastDot = s.lastIndexOf(c);
     if (lastDot == -1) {
       return new String[] {"", s};
     }
@@ -89,23 +98,62 @@ public class Parser {
   }
 
   public static String tryExtractVersion(File file) {
-    try {
-      String name = file.getName();
-      String[] nameAndExtension = splitByLastDotChar(name);
-      String fileName = nameAndExtension[0];
-      int minusCount = fileName.contains("SNAPSHOT") ? 2 : 1;
-      int i = fileName.length();
-      while (--i >= 0 && minusCount > 0) {
-        char c = fileName.charAt(i);
-        if (c == '-') minusCount--;
-      }
-      if (minusCount == 0) {
-        String version = fileName.substring(i + 2);
-        if (version.contains(".") && !version.endsWith(".") && !version.endsWith(".-SNAPSHOT")) {
-          return version;
+    JarFileInfo fileInfo = new JarFileInfo(file);
+    String archiveVersion = fileInfo.getArchiveVersion();
+    return archiveVersion != null ? archiveVersion : "1.0";
+  }
+
+  //${archiveBaseName}-${archiveAppendix}-${archiveVersion}-${archiveClassifier}.${archiveExtension}
+  public static class JarFileInfo {
+    private final String archiveName; // == ${archiveBaseName}-${archiveAppendix}
+    private final String archiveVersion;
+    private final String archiveClassifier;
+    private final String archiveExtension;
+
+    public JarFileInfo(File file) {
+      String[] strings = splitByLastDotChar(file.getName());
+      archiveExtension = strings[1];
+
+      String fileName = strings[0];
+
+      String[] nameVersionAndClassifier = splitByLastMinusChar(fileName);
+      if (Version.checkIsVersion(nameVersionAndClassifier[1])) {
+        archiveName = nameVersionAndClassifier[0];
+        archiveVersion = nameVersionAndClassifier[1];
+        archiveClassifier = null;
+      } else {
+        if (nameVersionAndClassifier[0].isEmpty()) {
+          archiveName = fileName;
+          archiveVersion = null;
+          archiveClassifier = null;
+        } else {
+          archiveClassifier = nameVersionAndClassifier[1];
+          String[] nameAndVersion = splitByLastMinusChar(nameVersionAndClassifier[0]);
+          if (Version.checkIsVersion(nameAndVersion[1])) {
+            archiveVersion = nameAndVersion[1];
+            archiveName = nameAndVersion[0];
+          } else {
+            archiveVersion = null;
+            archiveName = nameVersionAndClassifier[0];
+          }
         }
       }
-    } catch (Exception ignored) { }
-    return file.getName().contains("SNAPSHOT") ? "1.0-SNAPSHOT" : "1.0";
+    }
+
+    public String getArchiveName() {
+      return archiveName;
+    }
+
+    public String getArchiveVersion() {
+      return archiveVersion;
+    }
+
+    public String getArchiveClassifier() {
+      return archiveClassifier;
+    }
+
+    public String getArchiveExtension() {
+      return archiveExtension;
+    }
   }
 }

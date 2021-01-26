@@ -1,11 +1,16 @@
 package me.champeau.gradle.japicmp.ignore.entity;
 
-//TODO: Implement version supporting
+import me.champeau.gradle.japicmp.archive.Version;
+
 public abstract class Entity {
-  private final String version;
+  private final Version version;
 
   protected Entity(String version) {
-    this.version = version;
+    this.version = new Version(version);
+  }
+
+  public Version getVersion() {
+    return version;
   }
 
   public abstract String getClassName();
