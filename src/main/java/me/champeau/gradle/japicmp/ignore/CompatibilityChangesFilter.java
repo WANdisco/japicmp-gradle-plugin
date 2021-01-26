@@ -49,16 +49,21 @@ public class CompatibilityChangesFilter {
     List<Project> result = new ArrayList<>();
     if (objects != null) {
       for (Map.Entry<String, List<Map<String, String>>> projectEntry : objects.entrySet()) {
-        Project project = new Project(projectEntry.getKey());
-        result.add(project);
-        List<Map<String, String>> value = projectEntry.getValue();
-        if (value == null || value.isEmpty()) continue;
-        for (Map<String, String> entity : value) {
-          project.add(extractEntity(entity));
-        }
+        result.add(createProject(projectEntry));
       }
     }
     return result;
+  }
+
+  private Project createProject(Map.Entry<String, List<Map<String, String>>> projectEntry) {
+    Project project = new Project(projectEntry.getKey());
+    List<Map<String, String>> value = projectEntry.getValue();
+    if (value != null && !value.isEmpty()) {
+      for (Map<String, String> entity : value) {
+        project.add(extractEntity(entity));
+      }
+    }
+    return project;
   }
 
 

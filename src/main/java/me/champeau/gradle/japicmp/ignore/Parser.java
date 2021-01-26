@@ -98,9 +98,62 @@ public class Parser {
   }
 
   public static String tryExtractVersion(File file) {
-    JarFileInfo fileInfo = new JarFileInfo(file);
+    JarFileInfo fileInfo = parseJarFileInfo(file);
     String archiveVersion = fileInfo.getArchiveVersion();
     return archiveVersion != null ? archiveVersion : "1.0";
+  }
+
+  public static JarFileInfo parseJarFileInfo(File file) {
+    String archiveName;
+    String archiveVersion;
+    String archiveClassifier;
+    String archiveExtension;
+
+    String[] strings = splitByLastDotChar(file.getName());
+    archiveExtension = strings[1];
+    String fileName = strings[0];
+
+    String classifierCandidate = extractEntity(fileName);
+    if (isVersion(classifierCandidate)) {
+      archiveVersion = classifierCandidate;
+      archiveName = fileName.substring(0, fileName.length() - classifierCandidate.length() - 1);
+      archiveClassifier = null;
+    } else if (classifierCandidate.equals(fileName)) {
+      archiveName = fileName;
+      archiveVersion = null;
+      archiveClassifier = null;
+    } else {
+      archiveClassifier = classifierCandidate;
+      String rest = fileName.substring(0, fileName.length() - classifierCandidate.length() - 1);
+      String versionCandidate = extractEntity(rest);
+      if (isVersion(versionCandidate)) {
+        archiveVersion = versionCandidate;
+        archiveName = fileName.substring(0, fileName.length() - versionCandidate.length() - classifierCandidate.length() - 2);
+      } else {
+        archiveVersion = null;
+        archiveName = rest;
+      }
+    }
+
+    return new JarFileInfo(archiveName, archiveVersion, archiveClassifier, archiveExtension);
+  }
+
+  private static String extractEntity(String s) {
+    String[] strings = splitByLastMinusChar(s);
+    if (strings[0].isEmpty()) return strings[1];
+
+    if (strings[1].equals("SNAPSHOT")) {
+      String[] strings1 = splitByLastMinusChar(strings[0]);
+      return strings1[1] + "-" + strings[1];
+    }
+    return strings[1];
+  }
+
+  private static boolean isVersion(String s) {
+    String snapshot = "-SNAPSHOT";
+    return s.endsWith(snapshot)
+        ? Version.checkIsVersion(s.substring(0, s.length() - snapshot.length()))
+        : Version.checkIsVersion(s);
   }
 
   //${archiveBaseName}-${archiveAppendix}-${archiveVersion}-${archiveClassifier}.${archiveExtension}
@@ -110,34 +163,11 @@ public class Parser {
     private final String archiveClassifier;
     private final String archiveExtension;
 
-    public JarFileInfo(File file) {
-      String[] strings = splitByLastDotChar(file.getName());
-      archiveExtension = strings[1];
-
-      String fileName = strings[0];
-
-      String[] nameVersionAndClassifier = splitByLastMinusChar(fileName);
-      if (Version.checkIsVersion(nameVersionAndClassifier[1])) {
-        archiveName = nameVersionAndClassifier[0];
-        archiveVersion = nameVersionAndClassifier[1];
-        archiveClassifier = null;
-      } else {
-        if (nameVersionAndClassifier[0].isEmpty()) {
-          archiveName = fileName;
-          archiveVersion = null;
-          archiveClassifier = null;
-        } else {
-          archiveClassifier = nameVersionAndClassifier[1];
-          String[] nameAndVersion = splitByLastMinusChar(nameVersionAndClassifier[0]);
-          if (Version.checkIsVersion(nameAndVersion[1])) {
-            archiveVersion = nameAndVersion[1];
-            archiveName = nameAndVersion[0];
-          } else {
-            archiveVersion = null;
-            archiveName = nameVersionAndClassifier[0];
-          }
-        }
-      }
+    public JarFileInfo(String archiveName, String archiveVersion, String archiveClassifier, String archiveExtension) {
+      this.archiveName = archiveName;
+      this.archiveVersion = archiveVersion;
+      this.archiveClassifier = archiveClassifier;
+      this.archiveExtension = archiveExtension;
     }
 
     public String getArchiveName() {
