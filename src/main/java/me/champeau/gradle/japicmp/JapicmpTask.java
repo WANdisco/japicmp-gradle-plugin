@@ -93,8 +93,8 @@ public class JapicmpTask extends DefaultTask {
         classpath.addAll(resolveJaxb().getFiles());
       }
       workerConfiguration.setClasspath(classpath);
-      List<Archive> baseline = JapicmpTask.this.oldArchives != null ? toArchives(JapicmpTask.this.oldArchives) : inferArchives(oldClasspath);
-      List<Archive> current = JapicmpTask.this.newArchives != null ? toArchives(JapicmpTask.this.newArchives) : inferArchives(newClasspath);
+      List<Archive> baseline = oldArchives != null ? toArchives(oldArchives) : inferArchives(oldClasspath);
+      List<Archive> current = newArchives != null ? toArchives(newArchives) : inferArchives(newClasspath);
       workerConfiguration.setDisplayName("JApicmp check comparing " + current + " with " + baseline);
       workerConfiguration.params(
           // we use a single configuration object, instead of passing each parameter directly,

@@ -1,6 +1,9 @@
 package me.champeau.gradle.japicmp.archive;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Version implements Comparable<Version>, Serializable {
@@ -11,7 +14,7 @@ public class Version implements Comparable<Version>, Serializable {
     try {
       v = SemanticVersion.semanticVersion(version);
     } catch (VersionParseException e) {
-      v = new SemanticVersion(1, 0, null, null);
+      v = new SemanticVersion(new int[] {1, 0});
     }
     this.version = v;
   }
@@ -49,16 +52,10 @@ public class Version implements Comparable<Version>, Serializable {
   }
 
   private static class SemanticVersion implements Comparable<SemanticVersion>, Serializable {
-    private final Integer era;
-    private final Integer major;
-    private final Integer minor;
-    private final Integer patch;
+    private final int[] elements;
 
-    public SemanticVersion(Integer era, Integer major, Integer minor, Integer patch) {
-      this.era = era;
-      this.major = major;
-      this.minor = minor;
-      this.patch = patch;
+    public SemanticVersion(int[] elements) {
+      this.elements = elements;
     }
 
     @Override
@@ -66,31 +63,22 @@ public class Version implements Comparable<Version>, Serializable {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       SemanticVersion that = (SemanticVersion) o;
-      return Objects.equals(era, that.era)
-          && Objects.equals(major, that.major)
-          && Objects.equals(minor, that.minor)
-          && Objects.equals(patch, that.patch);
+      return Arrays.equals(elements, that.elements);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(era, major, minor, patch);
+      return Arrays.hashCode(elements);
     }
 
     @Override
     public String toString() {
       StringBuilder sb = new StringBuilder();
-      if (era != null) {
-        sb.append(era);
+      for (int element : elements) {
+        sb.append(element).append(".");
       }
-      if (major != null) {
-        sb.append(".").append(major);
-      }
-      if (minor != null) {
-        sb.append(".").append(minor);
-      }
-      if (patch != null) {
-        sb.append(".").append(patch);
+      if (elements.length > 0) {
+        sb.deleteCharAt(sb.length() - 1);
       }
       return sb.toString();
     }
@@ -101,43 +89,33 @@ public class Version implements Comparable<Version>, Serializable {
       }
       String[] split = rawVersion.split("\\.");
 
-      Integer era;
-      try {
-         era = Integer.parseInt(split[0]);
-      } catch (NumberFormatException e) {
-        throw new VersionParseException("Incorrect version format", e);
+      List<Integer> result = new ArrayList<>();
+      for (String s : split) {
+        try {
+          int i = Integer.parseInt(s);
+          result.add(i);
+        } catch (Exception e) {
+          break;
+        }
       }
-      Integer major = tryParseInt(split, 1);
-      Integer minor = tryParseInt(split, 2);
-      Integer patch = tryParseInt(split, 3);
 
-      return new SemanticVersion(era, major, minor, patch);
-    }
+      if (result.isEmpty()) {
+        throw new VersionParseException("The input: " + rawVersion + " can't be parse as version");
+      }
 
-    public static Integer tryParseInt(String[] arr, int index) {
-      try {
-        return Integer.parseInt(arr[index]);
-      } catch (Exception ignored) {}
-      return null;
+      return new SemanticVersion(result.stream().mapToInt(i->i).toArray());
     }
 
     @Override
     public int compareTo(SemanticVersion version) {
-      if (era == null) return 0;
-      int result = Integer.compare(era, version.era);
-      if (result != 0) return result;
-
-      if (major == null || version.major == null) return result;
-      result = Integer.compare(major, version.major);
-      if (result != 0) return result;
-
-
-      if (minor == null || version.minor == null) return result;
-      result = Integer.compare(minor, version.minor);
-      if (result != 0) return result;
-
-      if (patch == null || version.patch == null) return result;
-      return Integer.compare(patch, version.patch);
+      int minLength = Math.min(elements.length, version.elements.length);
+      for (int i = 0; i < minLength; i++) {
+        int compare = Integer.compare(elements[i], version.elements[i]);
+        if (compare != 0) {
+          return compare;
+        }
+      }
+      return Integer.compare(elements.length, version.elements.length);
     }
 
 

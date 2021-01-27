@@ -60,6 +60,7 @@ public class MethodProcessor {
       switch (reason) {
         case METHOD_REMOVED:
           classProvider.setRemoveElement(unmatchedChange.getjApiClass());
+          mutableProvider.setRemoveElement(unmatchedChange);
           if (manager.validate(classProvider, versions) || manager.validate(mutableProvider, versions)) {
             classMutator.removeCompatibilityChange(unmatchedChange, reason);
           }

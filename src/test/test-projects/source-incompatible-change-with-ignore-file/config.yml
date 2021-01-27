@@ -19,7 +19,7 @@ test1:
     version: 2.10.0.2
 
   - remove:
-    entity: me.champeau.gradle.japicmp.TestClass.test4():void
+    entity: me.champeau.gradle.japicmp.TestClass.test4():boolean
     version: 2.10.1.1
 
 

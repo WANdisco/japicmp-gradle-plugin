@@ -37,12 +37,14 @@ public class VersionTest {
     Assert.assertEquals(0, testVersion("2.2.11").compareTo(testVersion("2.2.11")));
 
     Assert.assertEquals(0, testVersion("2.2.11.0").compareTo(testVersion("2.2.11.0")));
-    Assert.assertEquals(0, testVersion("2.2.11.0").compareTo(testVersion("2.2.11")));
-    Assert.assertEquals(0, testVersion("2.2.11.10").compareTo(testVersion("2.2.11")));
+    Assert.assertEquals(1, testVersion("2.2.11.0").compareTo(testVersion("2.2.11")));
+    Assert.assertEquals(1, testVersion("2.2.11.10").compareTo(testVersion("2.2.11")));
 
     Assert.assertEquals(1, testVersion("3.2.11.0").compareTo(testVersion("2.2.11.0")));
     Assert.assertEquals(1, testVersion("2.3.11.0").compareTo(testVersion("2.2.11.0")));
     Assert.assertEquals(1, testVersion("2.2.12.0").compareTo(testVersion("2.2.11.0")));
     Assert.assertEquals(1, testVersion("2.2.11.1").compareTo(testVersion("2.2.11.0")));
+
+    Assert.assertEquals(1, testVersion("10.2.11.1").compareTo(testVersion("2.3.11.0")));
   }
 }

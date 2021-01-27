@@ -177,14 +177,6 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     return sb.toString();
   }
 
-  private static List<JApiCmpArchive> toJapiCmpArchives(List<Archive> archives) {
-    List<JApiCmpArchive> out = new ArrayList<>(archives.size());
-    for (Archive archive : archives) {
-      out.add(archive.toJapicmpArchive());
-    }
-    return out;
-  }
-
   private static String toClasspath(List<Archive> archives) {
     StringBuilder sb = new StringBuilder();
     for (Archive archive : archives) {

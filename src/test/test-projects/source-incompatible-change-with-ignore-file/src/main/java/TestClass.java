@@ -11,5 +11,5 @@ public class TestClass {
     return "";
   }
 
-  public void test4() {}
+  public boolean test4() { return false; }
 }
