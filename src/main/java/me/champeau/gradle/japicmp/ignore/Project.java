@@ -1,32 +1,24 @@
 package me.champeau.gradle.japicmp.ignore;
 
-import me.champeau.gradle.japicmp.ignore.entity.ClassDescriptor;
 import me.champeau.gradle.japicmp.ignore.entity.Entity;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Project {
   public final String name;
-  private final Map<String, ClassDescriptor> classes = new HashMap<>();
+  private final List<Entity<?>> entities = new ArrayList<>();
 
   public Project(String name) {
     this.name = name;
   }
 
-  public void add(Entity entity) {
-    ClassDescriptor classDescriptor = classes.computeIfAbsent(entity.getClassName(), ClassDescriptor::new);
-    classDescriptor.add(entity);
+  public void add(Entity<?> entity) {
+    entities.add(entity);
   }
 
-  public void addAll(Collection<Entity> entities) {
-    for (Entity entity : entities) {
-      add(entity);
-    }
-  }
-
-  public Collection<ClassDescriptor> classes() {
-    return classes.values();
+  public List<Entity<?>> getEntities() {
+    return Collections.unmodifiableList(entities);
   }
 }

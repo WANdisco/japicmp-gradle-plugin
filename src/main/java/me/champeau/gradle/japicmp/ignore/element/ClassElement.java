@@ -10,7 +10,16 @@ public class ClassElement extends Element<JApiClass> {
   }
 
   @Override
+  protected String doGetIdentifier() {
+    return "";
+  }
+
+  @Override
   public boolean process(JApiClass target) {
     return Objects.equals(target.getFullyQualifiedName(), getCanonicalName());
+  }
+
+  public static String extractIdentifier(JApiClass jApiClass) {
+    return jApiClass.getFullyQualifiedName();
   }
 }

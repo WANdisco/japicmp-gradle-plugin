@@ -22,5 +22,12 @@ public abstract class Element<T> {
     return fullPackageName + "." + className;
   }
 
+  public final String getIdentifier() {
+    String s = doGetIdentifier();
+    return getCanonicalName() + ((s != null && !s.isEmpty()) ? ":" + s : "");
+  }
+
+  protected abstract String doGetIdentifier();
+
   public abstract boolean process(T target);
 }

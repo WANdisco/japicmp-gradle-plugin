@@ -6,6 +6,7 @@ import japicmp.model.JApiParameter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class MethodElement extends Element<JApiMethod> {
   private final String returnedType;
@@ -25,6 +26,11 @@ public class MethodElement extends Element<JApiMethod> {
 
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String doGetIdentifier() {
+    return getName() + "(" + String.join(",", args.values()) + ")" + returnedType;
   }
 
   public Map<String, String> getArgs() {
@@ -52,5 +58,13 @@ public class MethodElement extends Element<JApiMethod> {
 
   private boolean validateArgs(List<JApiParameter> parameters) {
     return ElementUtil.validateArgs(parameters, args);
+  }
+
+
+  public static String extractIdentifier(JApiMethod jApiMethod, boolean isOld) {
+    return jApiMethod.getjApiClass().getFullyQualifiedName() + ":" +
+        jApiMethod.getName() +
+        "(" + jApiMethod.getParameters().stream().map(JApiParameter::getType).collect(Collectors.joining(",")) + ")" +
+        (isOld ? jApiMethod.getReturnType().getOldReturnType() : jApiMethod.getReturnType().getNewReturnType());
   }
 }

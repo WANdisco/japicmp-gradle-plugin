@@ -1,10 +1,12 @@
 package me.champeau.gradle.japicmp.ignore.processor;
 
 import japicmp.model.JApiChangeStatus;
+import japicmp.model.JApiClass;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiField;
 import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
+import me.champeau.gradle.japicmp.ignore.entity.Provider;
 
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,8 @@ import java.util.Map;
 public class FieldProcessor {
   private final ClassMutator classMutator;
   private final EntityManager manager;
+  private final Provider.MutableProvider<JApiField> provider = ProviderHelper.createDefaultFieldProvider();
+  private final Provider.MutableProvider<JApiClass> classProvider = ProviderHelper.createDefaultClassProvider();
 
   public FieldProcessor(ClassMutator classMutator, EntityManager manager) {
     this.classMutator = classMutator;
@@ -51,14 +55,17 @@ public class FieldProcessor {
     for (Map.Entry<JApiField, JApiField> entry : changer.getMatches().entrySet()) {
       JApiField key = entry.getKey();
       JApiField value = entry.getValue();
-      if (manager.validateChangeField(key, value, versions)) {
+      provider.setChangeElement(key, value);
+      if (manager.validate(provider, versions)) {
         classMutator.removeCompatibilityChange(key, JApiCompatibilityChange.FIELD_REMOVED);
         classMutator.removeCompatibilityChange(value, JApiCompatibilityChange.FIELD_REMOVED);
       }
     }
 
     for (JApiField unmatchedChange : changer.getUnmatchedChanges()) {
-      if (manager.validateRemoveField(unmatchedChange, versions)) {
+      classProvider.setRemoveElement(unmatchedChange.getjApiClass());
+      provider.setRemoveElement(unmatchedChange);
+      if (manager.validate(classProvider, versions) || manager.validate(provider, versions)) {
         classMutator.removeCompatibilityChange(
             unmatchedChange,
             changer.getReason(unmatchedChange) == JApiChangeStatus.REMOVED

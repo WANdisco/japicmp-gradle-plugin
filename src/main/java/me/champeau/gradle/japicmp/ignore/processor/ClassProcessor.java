@@ -6,6 +6,7 @@ import japicmp.model.JApiImplementedInterface;
 import japicmp.model.JApiSuperclass;
 import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
+import me.champeau.gradle.japicmp.ignore.entity.Provider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ public class ClassProcessor {
   private final FieldProcessor fieldProcessor;
   private final ConstructorProcessor constructorProcessor;
   private final EntityManager manager;
+  private final Provider.MutableProvider<JApiClass> provider = ProviderHelper.createDefaultClassProvider();
 
   public ClassProcessor(EntityManager manager) {
     this.manager = manager;
@@ -36,7 +38,8 @@ public class ClassProcessor {
   }
 
   private void doProcessClass(JApiClass clazz, VersionsRange versions) {
-    if (manager.validateRemoveClass(clazz, versions)) {
+    provider.setRemoveElement(clazz);
+    if (manager.validate(provider, versions)) {
       List<JApiCompatibilityChange> compatibilityChanges = new ArrayList<>(clazz.getCompatibilityChanges());
       for (JApiCompatibilityChange compatibilityChange : compatibilityChanges) {
         switch (compatibilityChange) {

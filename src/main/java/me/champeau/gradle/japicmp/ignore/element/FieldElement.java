@@ -23,6 +23,11 @@ public class FieldElement extends Element<JApiField> {
   }
 
   @Override
+  protected String doGetIdentifier() {
+    return fieldName + ":" + fieldType;
+  }
+
+  @Override
   public boolean process(JApiField field) {
     if (!validateName(field)) return false;
     if (!validateType(field)) return false;
@@ -39,5 +44,9 @@ public class FieldElement extends Element<JApiField> {
         || Objects.equals(fieldType, field.getType().getOldValue());
   }
 
-
+  public static String extractIdentifier(JApiField field, boolean isOld) {
+    return field.getjApiClass().getFullyQualifiedName()
+        + ":" + field.getName()
+        + ":" + (isOld ? field.getType().getOldValue() : field.getType().getNewValue());
+  }
 }

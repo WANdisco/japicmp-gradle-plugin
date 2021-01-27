@@ -2,21 +2,11 @@ package me.champeau.gradle.japicmp.ignore;
 
 
 import me.champeau.gradle.japicmp.archive.Diff;
-import me.champeau.gradle.japicmp.ignore.element.ClassElement;
-import me.champeau.gradle.japicmp.ignore.element.ConstructorElement;
 import me.champeau.gradle.japicmp.ignore.element.Element;
-import me.champeau.gradle.japicmp.ignore.element.FieldElement;
-import me.champeau.gradle.japicmp.ignore.element.MethodElement;
-import me.champeau.gradle.japicmp.ignore.entity.ChangeConstructorEntity;
-import me.champeau.gradle.japicmp.ignore.entity.ChangeFieldEntity;
-import me.champeau.gradle.japicmp.ignore.entity.ChangeMethodEntity;
-import me.champeau.gradle.japicmp.ignore.entity.ClassDescriptor;
+import me.champeau.gradle.japicmp.ignore.entity.ChangeEntity;
 import me.champeau.gradle.japicmp.ignore.entity.Entity;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
-import me.champeau.gradle.japicmp.ignore.entity.RemoveClassEntity;
-import me.champeau.gradle.japicmp.ignore.entity.RemoveConstructorEntity;
-import me.champeau.gradle.japicmp.ignore.entity.RemoveFieldEntity;
-import me.champeau.gradle.japicmp.ignore.entity.RemoveMethodEntity;
+import me.champeau.gradle.japicmp.ignore.entity.RemoveEntity;
 import me.champeau.gradle.japicmp.ignore.processor.ClassProcessor;
 import org.yaml.snakeyaml.Yaml;
 
@@ -68,9 +58,9 @@ public class CompatibilityChangesFilter {
 
 
   public void filterChanges(Diff diff) {
-    List<ClassDescriptor> collect = projects.stream()
+    List<Entity<?>> collect = projects.stream()
         .filter(diff::containsProject)
-        .map(Project::classes)
+        .map(Project::getEntities)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
 
@@ -84,7 +74,7 @@ public class CompatibilityChangesFilter {
 
   }
 
-  private Entity extractEntity(Map<String, String> map) {
+  private Entity<?> extractEntity(Map<String, String> map) {
     if (map.containsKey("remove")) {
       return remove(map);
     } else if (map.containsKey("change")) {
@@ -93,7 +83,7 @@ public class CompatibilityChangesFilter {
     throw new IllegalArgumentException("");
   }
 
-  private Entity remove(Map<String, String> map) {
+  private Entity<?> remove(Map<String, String> map) {
     String version = null;
     String entity = null;
     for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -113,20 +103,22 @@ public class CompatibilityChangesFilter {
     }
     Element<?> element = Parser.parseElement(entity);
 
-    if (element instanceof FieldElement) {
-      return new RemoveFieldEntity(version, (FieldElement) element);
-    } else if (element instanceof MethodElement) {
-      return new RemoveMethodEntity(version, (MethodElement) element);
-    } else if (element instanceof ConstructorElement) {
-      return new RemoveConstructorEntity(version, (ConstructorElement) element);
-    } else if (element instanceof ClassElement) {
-      return new RemoveClassEntity(version, (ClassElement) element);
-    }
+    return new RemoveEntity<>(version, element);
 
-    return null;
+//    if (element instanceof FieldElement) {
+//      return new RemoveFieldEntity(version, (FieldElement) element);
+//    } else if (element instanceof MethodElement) {
+//      return new RemoveMethodEntity(version, (MethodElement) element);
+//    } else if (element instanceof ConstructorElement) {
+//      return new RemoveConstructorEntity(version, (ConstructorElement) element);
+//    } else if (element instanceof ClassElement) {
+//      return new RemoveClassEntity(version, (ClassElement) element);
+//    }
+
+//    return null;
   }
 
-  private Entity change(Map<String, String> map) {
+  private Entity<?> change(Map<String, String> map) {
     String version = null;
     String prevEntity = null;
     String newEntity = null;
@@ -154,15 +146,16 @@ public class CompatibilityChangesFilter {
     Element<?> prevElement = Parser.parseElement(prevEntity);
     Element<?> newElement = Parser.parseElement(newEntity);
 
+    return new ChangeEntity(version, prevElement, newElement);
 
-    if (prevElement instanceof FieldElement) {
-      return new ChangeFieldEntity(version, (FieldElement) prevElement, (FieldElement) newElement);
-    } else if (prevElement instanceof MethodElement) {
-      return new ChangeMethodEntity(version, (MethodElement) prevElement, (MethodElement) newElement);
-    } else if (prevElement instanceof ConstructorElement) {
-      return new ChangeConstructorEntity(version, (ConstructorElement) prevElement, (ConstructorElement) newElement);
-    }
-
-    return null;
+//    if (prevElement instanceof FieldElement) {
+//      return new ChangeFieldEntity(version, (FieldElement) prevElement, (FieldElement) newElement);
+//    } else if (prevElement instanceof MethodElement) {
+//      return new ChangeMethodEntity(version, (MethodElement) prevElement, (MethodElement) newElement);
+//    } else if (prevElement instanceof ConstructorElement) {
+//      return new ChangeConstructorEntity(version, (ConstructorElement) prevElement, (ConstructorElement) newElement);
+//    }
+//
+//    return null;
   }
 }
