@@ -8,6 +8,6 @@ import org.gradle.api.Project;
  */
 public class JapicmpPlugin implements Plugin<Project> {
   public void apply(Project project) {
-    // this plugin doesn't create any task by default
+    project.getExtensions().getExtraProperties().set("JapicmpTask", me.champeau.gradle.japicmp.JapicmpTask.class);
   }
 }
