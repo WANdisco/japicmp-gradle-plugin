@@ -21,8 +21,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CompatibilityChangesFilter {
-  private final List<Project> projects;
+  private final List<DeclaredModule> declaredModules;
 
+  @SuppressWarnings("unchecked")
   public CompatibilityChangesFilter(File configFile) {
     Yaml yaml = new Yaml();
     HashMap<String, List<Map<String, String>>> objects = null;
@@ -32,35 +33,35 @@ public class CompatibilityChangesFilter {
       e.printStackTrace();
     }
 
-    projects = fillProjects(objects);
+    declaredModules = fillProjects(objects);
   }
 
-  private List<Project> fillProjects(HashMap<String, List<Map<String, String>>> objects) {
-    List<Project> result = new ArrayList<>();
+  private List<DeclaredModule> fillProjects(HashMap<String, List<Map<String, String>>> objects) {
+    List<DeclaredModule> result = new ArrayList<>();
     if (objects != null) {
       for (Map.Entry<String, List<Map<String, String>>> projectEntry : objects.entrySet()) {
-        result.add(createProject(projectEntry));
+        result.add(parseAsModule(projectEntry));
       }
     }
     return result;
   }
 
-  private Project createProject(Map.Entry<String, List<Map<String, String>>> projectEntry) {
-    Project project = new Project(projectEntry.getKey());
+  private DeclaredModule parseAsModule(Map.Entry<String, List<Map<String, String>>> projectEntry) {
+    DeclaredModule module = new DeclaredModule(projectEntry.getKey());
     List<Map<String, String>> value = projectEntry.getValue();
     if (value != null && !value.isEmpty()) {
       for (Map<String, String> entity : value) {
-        project.add(extractEntity(entity));
+        module.add(extractEntity(entity));
       }
     }
-    return project;
+    return module;
   }
 
 
   public void filterChanges(Diff diff) {
-    List<Entity<?>> collect = projects.stream()
+    List<Entity<?>> collect = declaredModules.stream()
         .filter(diff::containsProject)
-        .map(Project::getEntities)
+        .map(DeclaredModule::getEntities)
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
 
@@ -104,20 +105,9 @@ public class CompatibilityChangesFilter {
     Element<?> element = Parser.parseElement(entity);
 
     return new RemoveEntity<>(version, element);
-
-//    if (element instanceof FieldElement) {
-//      return new RemoveFieldEntity(version, (FieldElement) element);
-//    } else if (element instanceof MethodElement) {
-//      return new RemoveMethodEntity(version, (MethodElement) element);
-//    } else if (element instanceof ConstructorElement) {
-//      return new RemoveConstructorEntity(version, (ConstructorElement) element);
-//    } else if (element instanceof ClassElement) {
-//      return new RemoveClassEntity(version, (ClassElement) element);
-//    }
-
-//    return null;
   }
 
+  @SuppressWarnings("rawtypes")
   private Entity<?> change(Map<String, String> map) {
     String version = null;
     String prevEntity = null;
@@ -147,15 +137,5 @@ public class CompatibilityChangesFilter {
     Element<?> newElement = Parser.parseElement(newEntity);
 
     return new ChangeEntity(version, prevElement, newElement);
-
-//    if (prevElement instanceof FieldElement) {
-//      return new ChangeFieldEntity(version, (FieldElement) prevElement, (FieldElement) newElement);
-//    } else if (prevElement instanceof MethodElement) {
-//      return new ChangeMethodEntity(version, (MethodElement) prevElement, (MethodElement) newElement);
-//    } else if (prevElement instanceof ConstructorElement) {
-//      return new ChangeConstructorEntity(version, (ConstructorElement) prevElement, (ConstructorElement) newElement);
-//    }
-//
-//    return null;
   }
 }

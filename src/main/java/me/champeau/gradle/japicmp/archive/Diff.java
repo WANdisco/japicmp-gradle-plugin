@@ -2,7 +2,7 @@ package me.champeau.gradle.japicmp.archive;
 
 import japicmp.cmp.JarArchiveComparator;
 import japicmp.model.JApiClass;
-import me.champeau.gradle.japicmp.ignore.Project;
+import me.champeau.gradle.japicmp.ignore.DeclaredModule;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,8 +31,8 @@ public class Diff {
     }
   }
 
-  public boolean containsProject(Project project) {
-    return archivesName.contains(project.name);
+  public boolean containsProject(DeclaredModule declaredModule) {
+    return archivesName.contains(declaredModule.name);
   }
 
   public void forEach(Consumer<Info> action) {

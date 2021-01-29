@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Project {
+public class DeclaredModule {
   public final String name;
   private final List<Entity<?>> entities = new ArrayList<>();
 
-  public Project(String name) {
+  public DeclaredModule(String name) {
     this.name = name;
   }
 

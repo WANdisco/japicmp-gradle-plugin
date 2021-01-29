@@ -1,10 +1,10 @@
 package me.champeau.gradle.japicmp.archive;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 public class Version implements Comparable<Version>, Serializable {
   private final SemanticVersion version;
@@ -73,37 +73,32 @@ public class Version implements Comparable<Version>, Serializable {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder();
-      for (int element : elements) {
-        sb.append(element).append(".");
+      return Arrays.stream(elements)
+          .mapToObj(String::valueOf)
+          .collect(Collectors.joining("."));
+    }
+
+    private static OptionalInt parseSection(String section) {
+      try {
+        return OptionalInt.of(Integer.parseInt(section));
+      } catch (Exception e) {
+        return OptionalInt.empty();
       }
-      if (elements.length > 0) {
-        sb.deleteCharAt(sb.length() - 1);
-      }
-      return sb.toString();
     }
 
     public static SemanticVersion semanticVersion(String rawVersion) throws VersionParseException {
       if (rawVersion.endsWith(".")) {
         throw new VersionParseException("Incorrect version format with last dot char: " + rawVersion);
       }
-      String[] split = rawVersion.split("\\.");
-
-      List<Integer> result = new ArrayList<>();
-      for (String s : split) {
-        try {
-          int i = Integer.parseInt(s);
-          result.add(i);
-        } catch (Exception e) {
-          break;
-        }
-      }
-
-      if (result.isEmpty()) {
+      int[] versionSections = Arrays.stream(rawVersion.split("\\."))
+          .map(SemanticVersion::parseSection)
+          .filter(OptionalInt::isPresent)
+          .mapToInt(OptionalInt::getAsInt)
+          .toArray();
+      if (versionSections.length == 0) {
         throw new VersionParseException("The input: " + rawVersion + " can't be parse as version");
       }
-
-      return new SemanticVersion(result.stream().mapToInt(i->i).toArray());
+      return new SemanticVersion(versionSections);
     }
 
     @Override
