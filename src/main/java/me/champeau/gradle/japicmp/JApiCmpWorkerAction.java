@@ -15,7 +15,6 @@
  */
 package me.champeau.gradle.japicmp;
 
-import japicmp.cmp.JApiCmpArchive;
 import japicmp.cmp.JarArchiveComparator;
 import japicmp.cmp.JarArchiveComparatorOptions;
 import japicmp.config.Options;
@@ -62,7 +61,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -194,12 +192,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     options.setOldClassPath(japicmp.util.Optional.of(toClasspath(oldClasspath)));
     options.setNewClassPath(japicmp.util.Optional.of(toClasspath(newClasspath)));
     Diff diff = new Diff(jarArchiveComparator, oldArchives, newArchives);
-    List<JApiClass> jApiClasses = diff.classes();
-
-    if (compatibilityChangesFilterFile != null) {
-      CompatibilityChangesFilter filter = new CompatibilityChangesFilter(compatibilityChangesFilterFile);
-      filter.filterChanges(diff);
-    }
+    List<JApiClass> jApiClasses = compatibilityChangesFilterFile != null
+        ? new CompatibilityChangesFilter(compatibilityChangesFilterFile).filterChanges(diff)
+        : diff.classes();
 
     options.setOutputOnlyModifications(onlyModified);
     options.setOutputOnlyBinaryIncompatibleModifications(onlyBinaryIncompatibleModified);

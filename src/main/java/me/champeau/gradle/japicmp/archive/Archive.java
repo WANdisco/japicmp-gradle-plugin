@@ -1,6 +1,7 @@
 package me.champeau.gradle.japicmp.archive;
 
 import japicmp.cmp.JApiCmpArchive;
+import me.champeau.gradle.japicmp.ignore.Parser;
 
 import java.io.File;
 import java.io.Serializable;
@@ -8,10 +9,17 @@ import java.io.Serializable;
 public class Archive implements Serializable {
   private final File file;
   private final Version version;
+  private final String fileName;
 
-  public Archive(File file, String version) {
+  public Archive(File file, String fileName, String version) {
     this.file = file;
+    this.fileName = fileName;
     this.version = new Version(version);
+  }
+
+  public static Archive fromJarFile(File file) {
+    Parser.JarFileInfo fileInfo = Parser.parseJarFileInfo(file);
+    return new Archive(file, fileInfo.getArchiveName(), fileInfo.getArchiveVersion());
   }
 
   public File getFile() {
@@ -29,12 +37,7 @@ public class Archive implements Serializable {
   
   
   public String getFileName() {
-    String name = file.getName();
-    try {
-      int i = name.lastIndexOf(version.toString());
-      return name.substring(0, i - 1);
-    } catch (Exception ignored) {}
-    return name;
+    return fileName;
   }
 
   public JApiCmpArchive toJapicmpArchive() {

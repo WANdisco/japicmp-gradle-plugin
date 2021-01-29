@@ -3,7 +3,6 @@ package me.champeau.gradle.japicmp;
 import japicmp.filter.Filter;
 import me.champeau.gradle.japicmp.archive.Archive;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
-import me.champeau.gradle.japicmp.ignore.Parser;
 import me.champeau.gradle.japicmp.report.RichReport;
 import me.champeau.gradle.japicmp.report.RuleConfiguration;
 import org.gradle.api.Action;
@@ -11,6 +10,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.JavaVersion;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ResolvedArtifact;
 import org.gradle.api.artifacts.ResolvedDependency;
 import org.gradle.api.artifacts.dsl.DependencyHandler;
 import org.gradle.api.file.FileCollection;
@@ -175,14 +175,15 @@ public class JapicmpTask extends DefaultTask {
     Set<File> files = fc.getFiles();
     List<Archive> archives = new ArrayList<>(files.size());
     for (File file : files) {
-      archives.add(new Archive(file, Parser.tryExtractVersion(file)));
+      archives.add(Archive.fromJarFile(file));
     }
     return archives;
   }
 
   private void collectArchives(final List<Archive> archives, ResolvedDependency resolvedDependency) {
     String version = resolvedDependency.getModule().getId().getVersion();
-    archives.add(new Archive(resolvedDependency.getAllModuleArtifacts().iterator().next().getFile(), version));
+    ResolvedArtifact artifact = resolvedDependency.getAllModuleArtifacts().iterator().next();
+    archives.add(new Archive(artifact.getFile(), artifact.getName(), version));
     for (ResolvedDependency dependency : resolvedDependency.getChildren()) {
       collectArchives(archives, dependency);
     }

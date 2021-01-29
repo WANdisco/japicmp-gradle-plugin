@@ -1,6 +1,7 @@
 package me.champeau.gradle.japicmp.ignore;
 
 
+import japicmp.model.JApiClass;
 import me.champeau.gradle.japicmp.archive.Diff;
 import me.champeau.gradle.japicmp.ignore.element.Element;
 import me.champeau.gradle.japicmp.ignore.entity.ChangeEntity;
@@ -58,7 +59,7 @@ public class CompatibilityChangesFilter {
   }
 
 
-  public void filterChanges(Diff diff) {
+  public List<JApiClass> filterChanges(Diff diff) {
     List<Entity<?>> collect = declaredModules.stream()
         .filter(diff::containsProject)
         .map(DeclaredModule::getEntities)
@@ -73,6 +74,7 @@ public class CompatibilityChangesFilter {
         )
     );
 
+    return diff.classes();
   }
 
   private Entity<?> extractEntity(Map<String, String> map) {
