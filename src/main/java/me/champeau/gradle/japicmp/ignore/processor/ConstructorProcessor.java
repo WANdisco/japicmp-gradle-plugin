@@ -2,21 +2,21 @@ package me.champeau.gradle.japicmp.ignore.processor;
 
 import japicmp.model.JApiBehavior;
 import japicmp.model.JApiChangeStatus;
-import japicmp.model.JApiClass;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiConstructor;
 import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
-import me.champeau.gradle.japicmp.ignore.entity.Provider;
 
 import java.util.List;
 import java.util.Map;
 
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createChangeConstructorProvider;
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createClassProvider;
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createRemoveConstructorProvider;
+
 public class ConstructorProcessor {
   private final ClassMutator classMutator;
   private final EntityManager manager;
-  private final Provider.MutableProvider<JApiConstructor> provider = ProviderHelper.createDefaultConstructorProvider();
-  private final Provider.MutableProvider<JApiClass> classProvider = ProviderHelper.createDefaultClassProvider();
 
   public ConstructorProcessor(ClassMutator classMutator, EntityManager manager) {
     this.classMutator = classMutator;
@@ -24,35 +24,33 @@ public class ConstructorProcessor {
   }
 
   public void process(List<JApiConstructor> constructors, VersionsRange versions) {
-    Changer<JApiConstructor, JApiChangeStatus> changer = new Changer<>(JApiBehavior::getName);
+    Matcher<JApiConstructor, JApiChangeStatus> matcher = new Matcher<>(JApiBehavior::getName);
     for (JApiConstructor constructor : constructors) {
       JApiChangeStatus changeStatus = constructor.getChangeStatus();
       switch (changeStatus) {
         case NEW:
         case REMOVED:
-          changer.addToChanges(constructor, changeStatus);
+          matcher.add(constructor, changeStatus);
           break;
       }
     }
 
-    doProcess(changer, versions);
+    doProcess(matcher, versions);
   }
 
-  private void doProcess(Changer<JApiConstructor, JApiChangeStatus> changer, VersionsRange versions) {
-    for (Map.Entry<JApiConstructor, JApiConstructor> entry : changer.getMatches().entrySet()) {
+  private void doProcess(Matcher<JApiConstructor, JApiChangeStatus> matcher, VersionsRange versions) {
+    for (Map.Entry<JApiConstructor, JApiConstructor> entry : matcher.getMatches().entrySet()) {
       JApiConstructor key = entry.getKey();
       JApiConstructor value = entry.getValue();
-      provider.setChangeElement(key, value);
-      if (manager.validate(provider, versions)) {
+      if (manager.matches(createChangeConstructorProvider(key, value), versions)) {
         classMutator.removeCompatibilityChange(key, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
         classMutator.removeCompatibilityChange(value, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
       }
     }
 
-    for (JApiConstructor unmatchedChange : changer.getUnmatchedChanges()) {
-      classProvider.setRemoveElement(unmatchedChange.getjApiClass());
-      provider.setRemoveElement(unmatchedChange);
-      if (manager.validate(classProvider, versions) || manager.validate(provider, versions)) {
+    for (JApiConstructor unmatchedChange : matcher.getUnmatchedChanges()) {
+      if (manager.matches(createClassProvider(unmatchedChange.getjApiClass()), versions) ||
+          manager.matches(createRemoveConstructorProvider(unmatchedChange), versions)) {
         classMutator.removeCompatibilityChange(unmatchedChange, JApiCompatibilityChange.CONSTRUCTOR_REMOVED);
       }
     }

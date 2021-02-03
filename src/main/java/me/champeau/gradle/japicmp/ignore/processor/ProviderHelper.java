@@ -12,8 +12,8 @@ import me.champeau.gradle.japicmp.ignore.entity.Provider;
 
 public class ProviderHelper {
 
-  public static Provider.MutableProvider<JApiClass> createDefaultClassProvider() {
-    return new Provider.OnlyRemoveElementProvider<JApiClass>() {
+  public static Provider<JApiClass> createClassProvider(JApiClass removedClass) {
+    return new Provider.OnlyRemoveElementProvider<JApiClass>(removedClass) {
       @Override
       public String getIdentifier() {
         return ClassElement.extractIdentifier(getRemoveElement());
@@ -21,47 +21,68 @@ public class ProviderHelper {
     };
   }
 
-  public static Provider.MutableProvider<JApiConstructor> createDefaultConstructorProvider() {
-    return new Provider.MutableProviderImpl<JApiConstructor>() {
+  public static Provider<JApiConstructor> createRemoveConstructorProvider(JApiConstructor removeElement) {
+    return new Provider.OnlyRemoveElementProvider<JApiConstructor>(removeElement) {
+      @Override
+      public String getIdentifier() {
+        return ConstructorElement.extractIdentifier(getRemoveElement());
+      }
+    };
+  }
+
+  public static Provider<JApiConstructor> createChangeConstructorProvider(
+      JApiConstructor fromChangeElement,
+      JApiConstructor toChangeElement) {
+    return new Provider.OnlyChangeElementProvider<JApiConstructor>(fromChangeElement, toChangeElement) {
       @Override
       public String getIdentifier() {
         Pair<JApiConstructor> changeElement = getChangeElement();
-        if (changeElement != null) {
-          return ConstructorElement.extractIdentifier(changeElement.getFirst()) + ":"
-              + ConstructorElement.extractIdentifier(changeElement.getSecond());
-        } else {
-          return ConstructorElement.extractIdentifier(getRemoveElement());
-        }
+        return ConstructorElement.extractIdentifier(changeElement.getFirst()) + ":" +
+            ConstructorElement.extractIdentifier(changeElement.getSecond());
       }
     };
   }
 
-  public static Provider.MutableProvider<JApiField> createDefaultFieldProvider() {
-    return new Provider.MutableProviderImpl<JApiField>() {
+  public static Provider<JApiField> createRemoveFieldProvider(JApiField removeElement) {
+    return new Provider.OnlyRemoveElementProvider<JApiField>(removeElement) {
+      @Override
+      public String getIdentifier() {
+        return FieldElement.extractIdentifier(getRemoveElement(), true);
+      }
+    };
+  }
+
+  public static Provider<JApiField> createChangeFieldProvider(
+      JApiField fromChangeElement,
+      JApiField toChangeElement) {
+    return new Provider.OnlyChangeElementProvider<JApiField>(fromChangeElement, toChangeElement) {
       @Override
       public String getIdentifier() {
         Pair<JApiField> changeElement = getChangeElement();
-        if (changeElement != null) {
-          return FieldElement.extractIdentifier(changeElement.getFirst(), true) + ":"
-              + FieldElement.extractIdentifier(changeElement.getSecond(), false);
-        } else {
-          return FieldElement.extractIdentifier(getRemoveElement(), true);
-        }
+        return FieldElement.extractIdentifier(changeElement.getFirst(), true) + ":"
+            + FieldElement.extractIdentifier(changeElement.getSecond(), false);
       }
     };
   }
 
-  public static Provider.MutableProvider<JApiMethod> createDefaultMethodProvider() {
-    return new Provider.MutableProviderImpl<JApiMethod>() {
+  public static Provider<JApiMethod> createRemoveMethodProvider(JApiMethod removeElement) {
+    return new Provider.OnlyRemoveElementProvider<JApiMethod>(removeElement) {
+      @Override
+      public String getIdentifier() {
+        return MethodElement.extractIdentifier(getRemoveElement(), true);
+      }
+    };
+  }
+
+  public static Provider<JApiMethod> createChangeMethodProvider(
+      JApiMethod fromChangeElement,
+      JApiMethod toChangeElement) {
+    return new Provider.OnlyChangeElementProvider<JApiMethod>(fromChangeElement, toChangeElement) {
       @Override
       public String getIdentifier() {
         Pair<JApiMethod> changeElement = getChangeElement();
-        if (changeElement != null) {
-          return MethodElement.extractIdentifier(changeElement.getFirst(), true) + ":"
-              + MethodElement.extractIdentifier(changeElement.getSecond(), false);
-        } else {
-          return MethodElement.extractIdentifier(getRemoveElement(), true);
-        }
+        return MethodElement.extractIdentifier(changeElement.getFirst(), true) + ":"
+            + MethodElement.extractIdentifier(changeElement.getSecond(), false);
       }
     };
   }

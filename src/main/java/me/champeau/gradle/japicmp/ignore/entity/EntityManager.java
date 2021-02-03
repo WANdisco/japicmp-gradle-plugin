@@ -18,7 +18,7 @@ public class EntityManager {
     }
   }
 
-  public boolean validate(Provider provider, VersionsRange versionsRange) {
+  public boolean matches(Provider provider, VersionsRange versionsRange) {
     Entity<?> entity = entities.get(provider.getIdentifier());
     if (entity != null) {
 

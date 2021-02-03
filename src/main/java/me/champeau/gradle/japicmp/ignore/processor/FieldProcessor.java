@@ -1,21 +1,21 @@
 package me.champeau.gradle.japicmp.ignore.processor;
 
 import japicmp.model.JApiChangeStatus;
-import japicmp.model.JApiClass;
 import japicmp.model.JApiCompatibilityChange;
 import japicmp.model.JApiField;
 import me.champeau.gradle.japicmp.archive.VersionsRange;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
-import me.champeau.gradle.japicmp.ignore.entity.Provider;
 
 import java.util.List;
 import java.util.Map;
 
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createChangeFieldProvider;
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createClassProvider;
+import static me.champeau.gradle.japicmp.ignore.processor.ProviderHelper.createRemoveFieldProvider;
+
 public class FieldProcessor {
   private final ClassMutator classMutator;
   private final EntityManager manager;
-  private final Provider.MutableProvider<JApiField> provider = ProviderHelper.createDefaultFieldProvider();
-  private final Provider.MutableProvider<JApiClass> classProvider = ProviderHelper.createDefaultClassProvider();
 
   public FieldProcessor(ClassMutator classMutator, EntityManager manager) {
     this.classMutator = classMutator;
@@ -23,7 +23,7 @@ public class FieldProcessor {
   }
 
   public void process(List<JApiField> fields, VersionsRange versions) {
-    Changer<JApiField, JApiChangeStatus> changer = new Changer<>(
+    Matcher<JApiField, JApiChangeStatus> matcher = new Matcher<>(
         JApiField::getName,
         field -> {
           String targetName = manager.tryToFindMatchChange(field);
@@ -35,40 +35,37 @@ public class FieldProcessor {
       switch (changeStatus) {
         case NEW:
         case REMOVED:
-          changer.addToChanges(field, changeStatus);
+          matcher.add(field, changeStatus);
           break;
         case MODIFIED:
           for (JApiCompatibilityChange compatibilityChange : field.getCompatibilityChanges()) {
-            switch (compatibilityChange) {
-              case FIELD_TYPE_CHANGED:
-                changer.addToChanges(field, JApiChangeStatus.MODIFIED);
+            if (compatibilityChange == JApiCompatibilityChange.FIELD_TYPE_CHANGED) {
+              matcher.add(field, JApiChangeStatus.MODIFIED);
             }
           }
           break;
       }
     }
 
-    doProcess(changer, versions);
+    doProcess(matcher, versions);
   }
 
-  private void doProcess(Changer<JApiField, JApiChangeStatus> changer, VersionsRange versions) {
-    for (Map.Entry<JApiField, JApiField> entry : changer.getMatches().entrySet()) {
+  private void doProcess(Matcher<JApiField, JApiChangeStatus> matcher, VersionsRange versions) {
+    for (Map.Entry<JApiField, JApiField> entry : matcher.getMatches().entrySet()) {
       JApiField key = entry.getKey();
       JApiField value = entry.getValue();
-      provider.setChangeElement(key, value);
-      if (manager.validate(provider, versions)) {
+      if (manager.matches(createChangeFieldProvider(key, value), versions)) {
         classMutator.removeCompatibilityChange(key, JApiCompatibilityChange.FIELD_REMOVED);
         classMutator.removeCompatibilityChange(value, JApiCompatibilityChange.FIELD_REMOVED);
       }
     }
 
-    for (JApiField unmatchedChange : changer.getUnmatchedChanges()) {
-      classProvider.setRemoveElement(unmatchedChange.getjApiClass());
-      provider.setRemoveElement(unmatchedChange);
-      if (manager.validate(classProvider, versions) || manager.validate(provider, versions)) {
+    for (JApiField unmatchedChange : matcher.getUnmatchedChanges()) {
+      if (manager.matches(createClassProvider(unmatchedChange.getjApiClass()), versions) ||
+          manager.matches(createRemoveFieldProvider(unmatchedChange), versions)) {
         classMutator.removeCompatibilityChange(
             unmatchedChange,
-            changer.getReason(unmatchedChange) == JApiChangeStatus.REMOVED
+            matcher.getReason(unmatchedChange) == JApiChangeStatus.REMOVED
                 ? JApiCompatibilityChange.FIELD_REMOVED
                 : JApiCompatibilityChange.FIELD_TYPE_CHANGED
         );

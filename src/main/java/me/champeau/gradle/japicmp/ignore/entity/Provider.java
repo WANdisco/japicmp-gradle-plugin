@@ -8,19 +8,11 @@ public interface Provider<T> {
   String getIdentifier();
 
   class Pair<T> {
-    private T first;
-    private T second;
+    private final T first;
+    private final T second;
 
     public Pair(T first, T second) {
       this.first = first;
-      this.second = second;
-    }
-
-    public void setFirst(T first) {
-      this.first = first;
-    }
-
-    public void setSecond(T second) {
       this.second = second;
     }
 
@@ -33,29 +25,16 @@ public interface Provider<T> {
     }
   }
 
-  interface MutableProvider<T> extends Provider<T> {
-    void setRemoveElement(T element);
+  abstract class OnlyRemoveElementProvider<T> implements Provider<T> {
+    private final T removeElement;
 
-    void setChangeElement(T oldElement, T newElement);
-  }
-
-
-  abstract class OnlyRemoveElementProvider<T> implements MutableProvider<T> {
-    private T removeElement;
+    public OnlyRemoveElementProvider(T removeElement) {
+      this.removeElement = removeElement;
+    }
 
     @Override
     public T getRemoveElement() {
       return removeElement;
-    }
-
-    @Override
-    public void setRemoveElement(T method) {
-      this.removeElement = method;
-    }
-
-    @Override
-    public void setChangeElement(T oldMethod, T newMethod) {
-      throw new UnsupportedOperationException("Only remove element provider");
     }
 
     @Override
@@ -64,21 +43,16 @@ public interface Provider<T> {
     }
   }
 
-  public abstract class MutableProviderImpl<T> implements MutableProvider<T> {
-    private T removeElement;
-    private Pair<T> changeElement;
+  abstract class OnlyChangeElementProvider<T> implements Provider<T> {
+    private final Pair<T> changeElement;
 
-    public void setRemoveElement(T method) {
-      removeElement = method;
-    }
-
-    public void setChangeElement(T oldMethod, T newMethod) {
-      changeElement = new Pair<>(oldMethod, newMethod);
+    public OnlyChangeElementProvider(T fromChangeElement, T toChangeElement) {
+      this.changeElement = new Pair<>(fromChangeElement, toChangeElement);
     }
 
     @Override
     public T getRemoveElement() {
-      return removeElement;
+      throw new UnsupportedOperationException("Only change element provider");
     }
 
     @Override
@@ -86,6 +60,4 @@ public interface Provider<T> {
       return changeElement;
     }
   }
-
-
 }

@@ -7,7 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class Changer<T, R> {
+/**
+ *  A class is a special data structure. For each input argument, it tries to find a pair from the previously added and unpaired ones.
+ * The pair is searched for either by the standard name extraction function or by any custom match function.
+ * Also, each added element has a reason for adding which does not affect the search for a matched element.
+ * @param <T> Type of each element
+ * @param <R> Type of reason to add to matcher
+ */
+public class Matcher<T, R> {
   private final Function<T, String> nameExtractor;
   private final Function<T, String> matcher;
 
@@ -15,16 +22,16 @@ public class Changer<T, R> {
   private final Map<String, T> changes = new HashMap<>();
   private final Map<T, T> matches = new HashMap<>();
 
-  public Changer(Function<T, String> nameExtractor) {
+  public Matcher(Function<T, String> nameExtractor) {
     this(nameExtractor, nameExtractor);
   }
 
-  public Changer(Function<T, String> nameExtractor, Function<T, String> matcher) {
+  public Matcher(Function<T, String> nameExtractor, Function<T, String> matcher) {
     this.nameExtractor = nameExtractor;
     this.matcher = matcher;
   }
 
-  public void addToChanges(T element, R reason) {
+  public void add(T element, R reason) {
     reasons.put(element, reason);
 
     T match = changes.remove(matcher.apply(element));

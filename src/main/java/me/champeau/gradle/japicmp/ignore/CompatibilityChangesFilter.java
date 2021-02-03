@@ -8,7 +8,7 @@ import me.champeau.gradle.japicmp.ignore.entity.ChangeEntity;
 import me.champeau.gradle.japicmp.ignore.entity.Entity;
 import me.champeau.gradle.japicmp.ignore.entity.EntityManager;
 import me.champeau.gradle.japicmp.ignore.entity.RemoveEntity;
-import me.champeau.gradle.japicmp.ignore.processor.ClassProcessor;
+import me.champeau.gradle.japicmp.ignore.processor.Processor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
@@ -34,22 +34,21 @@ public class CompatibilityChangesFilter {
       e.printStackTrace();
     }
 
-    declaredModules = fillProjects(objects);
+    declaredModules = fillModules(objects);
   }
 
-  private List<DeclaredModule> fillProjects(HashMap<String, List<Map<String, String>>> objects) {
+  private List<DeclaredModule> fillModules(HashMap<String, List<Map<String, String>>> objects) {
     List<DeclaredModule> result = new ArrayList<>();
     if (objects != null) {
       for (Map.Entry<String, List<Map<String, String>>> projectEntry : objects.entrySet()) {
-        result.add(parseAsModule(projectEntry));
+        result.add(parseAsModule(projectEntry.getKey(), projectEntry.getValue()));
       }
     }
     return result;
   }
 
-  private DeclaredModule parseAsModule(Map.Entry<String, List<Map<String, String>>> projectEntry) {
-    DeclaredModule module = new DeclaredModule(projectEntry.getKey());
-    List<Map<String, String>> value = projectEntry.getValue();
+  private DeclaredModule parseAsModule(String name, List<Map<String, String>> value) {
+    DeclaredModule module = new DeclaredModule(name);
     if (value != null && !value.isEmpty()) {
       for (Map<String, String> entity : value) {
         module.add(extractEntity(entity));
@@ -66,9 +65,9 @@ public class CompatibilityChangesFilter {
         .flatMap(Collection::stream)
         .collect(Collectors.toList());
 
-    ClassProcessor classProcessor = new ClassProcessor(new EntityManager(collect));
+    Processor processor = new Processor(new EntityManager(collect));
     diff.forEach(diffInfo ->
-        classProcessor.process(
+        processor.process(
             diffInfo.getClasses(),
             diffInfo.getVersionsRange()
         )

@@ -25,13 +25,12 @@ public class ChangeEntityTest extends BaseTest {
 
     ChangeEntity<JApiMethod> changeMethodEntity = new ChangeEntity<>("1.2", methodElement1, methodElement2);
 
-    Provider.MutableProviderImpl<JApiMethod> provider = new Provider.MutableProviderImpl<JApiMethod>() {
+    Provider<JApiMethod> provider = new Provider.OnlyChangeElementProvider<JApiMethod>(jApiMethod1, jApiMethod2) {
       @Override
       public String getIdentifier() {
         return "identifier";
       }
     };
-    provider.setChangeElement(jApiMethod1, jApiMethod2);
     Assert.assertTrue(changeMethodEntity.process(provider));
 
   }
