@@ -21,7 +21,7 @@ public class Processor {
     constructorProcessor = new ConstructorProcessor(classMutator, manager);
   }
 
-  public void process(List<JApiClass> classes, VersionsRange versions) {
+  public List<JApiClass> process(List<JApiClass> classes, VersionsRange versions) {
     for (JApiClass clazz : classes) {
       classProcessor.process(clazz, versions);
       methodProcessor.process(clazz.getMethods(), versions);
@@ -29,5 +29,6 @@ public class Processor {
       constructorProcessor.process(clazz.getConstructors(), versions);
       classMutator.tryClearClass(clazz);
     }
+    return classes;
   }
 }

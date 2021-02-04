@@ -192,10 +192,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     options.setOldClassPath(japicmp.util.Optional.of(toClasspath(oldClasspath)));
     options.setNewClassPath(japicmp.util.Optional.of(toClasspath(newClasspath)));
     Diff diff = new Diff(jarArchiveComparator, oldArchives, newArchives);
-    List<JApiClass> jApiClasses = diff.classes();
-    if (compatibilityChangesFilterFile != null) {
-      jApiClasses = new CompatibilityChangesFilter(compatibilityChangesFilterFile).filterChanges(diff);
-    }
+    List<JApiClass> jApiClasses = compatibilityChangesFilterFile != null
+        ? diff.classes(new CompatibilityChangesFilter(compatibilityChangesFilterFile))
+        : diff.classes();
 
     options.setOutputOnlyModifications(onlyModified);
     options.setOutputOnlyBinaryIncompatibleModifications(onlyBinaryIncompatibleModified);
