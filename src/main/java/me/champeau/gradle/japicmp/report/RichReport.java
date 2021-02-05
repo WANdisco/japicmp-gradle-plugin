@@ -21,7 +21,7 @@ public class RichReport implements Serializable {
   private String reportName = "rich-report.html";
   private String title;
   private String description;
-  private List<RuleConfiguration> rules = new ArrayList<RuleConfiguration>();
+  private List<RuleConfiguration<?>> rules = new ArrayList<>();
   private boolean addDefaultRules;
 
   public void addRule(Class<? extends ViolationRule> rule, Map<String, String> params) {
@@ -138,11 +138,11 @@ public class RichReport implements Serializable {
   }
 
   @Input
-  public List<RuleConfiguration> getRules() {
+  public List<RuleConfiguration<?>> getRules() {
     return rules;
   }
 
-  public void setRules(List<RuleConfiguration> rules) {
+  public void setRules(List<RuleConfiguration<?>> rules) {
     this.rules = rules;
   }
 

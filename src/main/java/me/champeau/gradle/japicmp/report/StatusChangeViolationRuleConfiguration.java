@@ -22,7 +22,10 @@ import java.util.Map;
 public class StatusChangeViolationRuleConfiguration extends ViolationRuleConfiguration {
   private final JApiChangeStatus status;
 
-  public StatusChangeViolationRuleConfiguration(final Class<? extends ViolationRule> ruleClass, final Map<String, String> arguments, final JApiChangeStatus status) {
+  public StatusChangeViolationRuleConfiguration(
+      Class<? extends ViolationRule> ruleClass,
+      Map<String, String> arguments,
+      JApiChangeStatus status) {
     super(ruleClass, arguments);
     this.status = status;
   }

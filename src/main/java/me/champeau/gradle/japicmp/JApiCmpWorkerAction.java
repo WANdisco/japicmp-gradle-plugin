@@ -15,7 +15,6 @@
  */
 package me.champeau.gradle.japicmp;
 
-import japicmp.cmp.JApiCmpArchive;
 import japicmp.cmp.JarArchiveComparator;
 import japicmp.cmp.JarArchiveComparatorOptions;
 import japicmp.config.Options;
@@ -33,7 +32,10 @@ import japicmp.output.stdout.StdoutOutputGenerator;
 import japicmp.output.xml.XmlOutput;
 import japicmp.output.xml.XmlOutputGenerator;
 import japicmp.output.xml.XmlOutputGeneratorOptions;
+import me.champeau.gradle.japicmp.archive.Archive;
+import me.champeau.gradle.japicmp.archive.Diff;
 import me.champeau.gradle.japicmp.filters.FilterConfiguration;
+import me.champeau.gradle.japicmp.ignore.CompatibilityChangesFilter;
 import me.champeau.gradle.japicmp.report.CompatibilityChangeViolationRuleConfiguration;
 import me.champeau.gradle.japicmp.report.PostProcessRuleConfiguration;
 import me.champeau.gradle.japicmp.report.PostProcessViolationsRule;
@@ -55,11 +57,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -94,7 +95,8 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
         configuration.txtOutputFile,
         configuration.failOnModification,
         configuration.buildDir,
-        configuration.richReport);
+        configuration.richReport,
+        configuration.compatibilityChangesFilterFile);
   }
 
   private JarArchiveComparatorOptions createOptions() {
@@ -162,9 +164,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
 
   }
 
-  private static String prettyPrint(List<JApiCmpArchive> archives) {
+  private static String prettyPrint(List<Archive> archives) {
     StringBuilder sb = new StringBuilder();
-    for (JApiCmpArchive archive : archives) {
+    for (Archive archive : archives) {
       if (sb.length() > 0) {
         sb.append(", ");
       }
@@ -173,21 +175,13 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     return sb.toString();
   }
 
-  private static List<JApiCmpArchive> toJapiCmpArchives(List<Archive> archives) {
-    List<JApiCmpArchive> out = new ArrayList<>(archives.size());
-    for (Archive archive : archives) {
-      out.add(archive.toJapicmpArchive());
-    }
-    return out;
-  }
-
   private static String toClasspath(List<Archive> archives) {
     StringBuilder sb = new StringBuilder();
     for (Archive archive : archives) {
       if (sb.length() > 0) {
         sb.append(":");
       }
-      sb.append(archive.file.getAbsolutePath());
+      sb.append(archive.getFile().getAbsolutePath());
     }
     return sb.toString();
   }
@@ -197,9 +191,11 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     Options options = Options.newDefault();
     options.setOldClassPath(japicmp.util.Optional.of(toClasspath(oldClasspath)));
     options.setNewClassPath(japicmp.util.Optional.of(toClasspath(newClasspath)));
-    final List<JApiCmpArchive> baseline = toJapiCmpArchives(oldArchives);
-    final List<JApiCmpArchive> current = toJapiCmpArchives(newArchives);
-    List<JApiClass> jApiClasses = jarArchiveComparator.compare(baseline, current);
+    Diff diff = new Diff(jarArchiveComparator, oldArchives, newArchives);
+    List<JApiClass> jApiClasses = compatibilityChangesFilterFile != null
+        ? diff.classes(new CompatibilityChangesFilter(compatibilityChangesFilterFile))
+        : diff.classes();
+
     options.setOutputOnlyModifications(onlyModified);
     options.setOutputOnlyBinaryIncompatibleModifications(onlyBinaryIncompatibleModified);
     options.setIncludeSynthetic(includeSynthetic);
@@ -232,7 +228,7 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
       StdoutOutputGenerator stdoutOutputGenerator = new StdoutOutputGenerator(options, jApiClasses);
       String output = stdoutOutputGenerator.generate();
       try (BufferedWriter writer = new BufferedWriter(
-          new OutputStreamWriter(new FileOutputStream(txtOutputFile), "utf-8")
+          new OutputStreamWriter(new FileOutputStream(txtOutputFile), StandardCharsets.UTF_8)
       )) {
         writer.write(output);
       } catch (IOException ex) {
@@ -248,8 +244,8 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
       final List<String> includedClasses = richReport.getIncludedClasses();
       final List<String> excludedClasses = richReport.getExcludedClasses();
       ViolationsGenerator generator = new ViolationsGenerator(includedClasses, excludedClasses);
-      List<RuleConfiguration> rules = richReport.getRules();
-      for (RuleConfiguration configuration : rules) {
+      List<RuleConfiguration<?>> rules = richReport.getRules();
+      for (RuleConfiguration<?> configuration : rules) {
         Map<String, String> arguments = configuration.getArguments();
         Class<?> ruleClass = configuration.getRuleClass();
         try {
@@ -307,9 +303,9 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
         reportLink = null;
       }
       StringBuilder message = new StringBuilder("Detected binary changes between ")
-          .append(prettyPrint(current))
+          .append(prettyPrint(newArchives))
           .append(" and ")
-          .append(prettyPrint(baseline));
+          .append(prettyPrint(oldArchives));
       if (reportLink != null) {
         message.append(".").append(System.lineSeparator()).append(System.lineSeparator());
         message.append("See failure report at ").append(reportLink);
@@ -327,22 +323,4 @@ public class JApiCmpWorkerAction extends JapiCmpWorkerConfiguration implements R
     return false;
   }
 
-  public static class Archive implements Serializable {
-    private final File file;
-    private final String version;
-
-    public Archive(final File file, final String version) {
-      this.file = file;
-      this.version = version;
-    }
-
-    @Override
-    public String toString() {
-      return file.getName();
-    }
-
-    public JApiCmpArchive toJapicmpArchive() {
-      return new JApiCmpArchive(file, version);
-    }
-  }
 }

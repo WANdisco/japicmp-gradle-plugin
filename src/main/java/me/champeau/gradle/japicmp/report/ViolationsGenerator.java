@@ -31,7 +31,6 @@ import me.champeau.gradle.japicmp.report.stdrules.UnchangedMemberRule;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -39,9 +38,9 @@ import java.util.regex.Pattern;
 public class ViolationsGenerator {
   private final List<Pattern> includePatterns;
   private final List<Pattern> excludePatterns;
-  private final Map<JApiCompatibilityChange, List<ViolationRule>> apiCompatibilityRules = new HashMap<JApiCompatibilityChange, List<ViolationRule>>();
-  private final Map<JApiChangeStatus, List<ViolationRule>> statusRules = new HashMap<JApiChangeStatus, List<ViolationRule>>();
-  private final List<ViolationRule> genericRules = new ArrayList<ViolationRule>();
+  private final Map<JApiCompatibilityChange, List<ViolationRule>> apiCompatibilityRules = new HashMap<>();
+  private final Map<JApiChangeStatus, List<ViolationRule>> statusRules = new HashMap<>();
+  private final List<ViolationRule> genericRules = new ArrayList<>();
 
   private final List<SetupRule> setupRules = new ArrayList<>();
   private final List<PostProcessViolationsRule> postProcessRules = new ArrayList<>();
@@ -114,7 +113,7 @@ public class ViolationsGenerator {
     for (PostProcessViolationsRule postProcessViolationsRule : postProcessRules) {
       postProcessViolationsRule.execute(ctx);
     }
-    return ctx.violations;
+    return ctx.getViolations();
   }
 
   private void addDefaultRuleIfNotConfigured() {
@@ -184,9 +183,9 @@ public class ViolationsGenerator {
   }
 
   private void processClass(final JApiClass clazz, final Context context) {
-    String oldClass = context.currentClass;
+    String oldClass = context.getCurrentClass();
     try {
-      context.currentClass = clazz.getFullyQualifiedName();
+      context.setCurrentClass(clazz.getFullyQualifiedName());
       processAllChanges(clazz, context);
       for (JApiField field : clazz.getFields()) {
         processAllChanges(field, context);
@@ -201,7 +200,7 @@ public class ViolationsGenerator {
         processAllChanges(anInterface, context);
       }
     } finally {
-      context.currentClass = oldClass;
+      context.setCurrentClass(oldClass);
     }
   }
 
@@ -234,52 +233,4 @@ public class ViolationsGenerator {
     }
   }
 
-  private static class Context implements ViolationCheckContextWithViolations {
-    // violations per fully-qualified class name
-    private final Map<String, List<Violation>> violations = new LinkedHashMap<String, List<Violation>>();
-    private final Map<String, Object> userData = new LinkedHashMap<>();
-
-    private String currentClass;
-
-    void maybeAddViolation(Violation v) {
-      if (v == null) {
-        return;
-      }
-      if (currentClass == null) {
-        throw new IllegalStateException();
-      }
-      List<Violation> violations = this.violations.get(currentClass);
-      if (violations == null) {
-        violations = new ArrayList<Violation>();
-        this.violations.put(currentClass, violations);
-      }
-      violations.add(v);
-    }
-
-    @Override
-    public String getClassName() {
-      return currentClass;
-    }
-
-    @Override
-    public Map<String, ?> getUserData() {
-      return userData;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T getUserData(final String key) {
-      return (T) userData.get(key);
-    }
-
-    @Override
-    public <T> void putUserData(final String key, final T value) {
-      userData.put(key, value);
-    }
-
-    @Override
-    public Map<String, List<Violation>> getViolations() {
-      return violations;
-    }
-  }
 }
